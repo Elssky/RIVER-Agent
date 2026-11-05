@@ -2,6 +2,8 @@
 
 # RIVER-Agent
 
+[English](README.md) | [简体中文](readme-zh.md)
+
 ### A Shore-side AI Agent for Inland Waterway Intelligence
 
 **Reliable Inland Vessel Evidence-based Reasoning**
@@ -20,8 +22,6 @@
 **RIVER-Agent** is a research project exploring a unified, shore-side AI agent for inland waterway traffic intelligence and navigation decision support.
 
 The project aims to bring together vessel observations, waterway information, traffic prediction, risk assessment, and domain-specific tools. A **single central agent** will plan analyses, invoke specialized tools, check supporting evidence, and provide traceable results for vessel services and regional traffic management.
-
-**中文简介：** RIVER-Agent 是面向内河航运的岸基智能体研究项目，目标是融合多源交通感知、船舶与交通流预测、风险评估和航道知识，支持自主分析、航行服务与区域交通协同辅助决策。
 
 ## Design Principles
 
