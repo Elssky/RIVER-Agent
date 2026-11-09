@@ -107,6 +107,7 @@ flowchart TB
 | **自主边界** | 限制工具权限、执行预算、重试和时长；失败可明确终止或请求人工处理。 |
 | **开发底座候选** | **优先评估 DeepSeek Harness（dsh）或 OpenAI Codex 开源代码**，尚未选型；RIVER-Agent 专业能力优先通过可替换接口与上游 Runtime 对接。 |
 | **上下文与数据分层** | 区分 Context、Session Event Log、Task State、Result Store、Long-term Memory 和 **World State**；World State 具体实现单列专题，暂不定技术方案。 |
+| **主动任务阶段边界** | **第一版优先定时任务（Scheduled Tasks）**；交通事件触发（Event Trigger / Event Monitor）**暂缓开发**，保留为后续扩展，不改变长期主动 + 被动融合的总体目标。 |
 
 **关键修订记录**：此前曾讨论以“Plan–Execute–Verify–Replan”描述总体执行机制；后续明确了**ReAct 是默认 Runtime，Plan 是可选 Mode**。因此，“每个任务必须先生成计划”**不再是当前设计要求**。
 
@@ -153,7 +154,25 @@ ReAct：选择下一步行动
 - **关键约束**：对交通风险分析和历史科研评测，应区分数据**实际发生时间**与**何时对系统可见**，防止使用未来才到达或发布的信息。
 - **当前决定**：**记录需求与设计边界，暂不确定具体数据库、消息系统、Schema 或融合算法。** 后续在第 03 阶段确定其与 Agent Runtime 的接口边界，在第 05 阶段专门深入研究 World State 的实现。
 
-### 3.4 当前待讨论清单
+### 3.4 主动运行范围修订：定时优先，事件触发暂缓
+
+**已确定（2026-11-09）**：第一版不开发事件触发型 Agent 任务；当前仅优先讨论并接入**定时执行**。这是开发阶段范围的调整，不是取消长期“主动 + 被动融合”目标。
+
+**已核实的可复用能力：**
+
+- **dsh**：官方 Host Schedule 可持久化定时任务，支持 at、after、every、daily、weekly、cron、rrule 等规则；调度器向已有、首次创建后复用、或每次新建的 Session 投递指令，Agent Loop 按通常流程执行。Host 停止则暂停到期投递，恢复后按规则处理错过的周期。
+- **Codex**：Codex 桌面产品具有 Scheduled Tasks，但不应假定相同的 UI 调度器可直接随开源 Harness 一同复用。以开源 Codex 为底座时，优先评估外部 Scheduler + `codex exec`、SDK 或 app-server 的组合。
+- **共同原则**：定时器只负责“何时触发”，Agent Runtime 负责“如何分析”；每次触发应有独立运行记录，必要时引用最新 World State 与此前经验证的任务摘要。
+
+**待确定**：最终采用的底座及调度接口、定时任务与 Session/Run 的一对多关系、Host 停机后的补执行规则、任务重叠策略、通知权限以及审计记录。以上不在当前讨论中提前锁定。
+
+参考：
+- https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/subsystems/schedule.md
+- https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/schedule.md
+- https://developers.openai.com/blog/codex-as-a-platform
+- https://learn.chatgpt.com/docs/automations
+
+### 3.5 当前待讨论清单
 
 - [ ] **ReAct Runtime**：模型调用、工具调用、观察结果、下一轮决策的具体执行协议。
 - [ ] **Task State**：任务状态 Schema、消息与证据的关系、任务生命周期及持久化。
@@ -161,7 +180,8 @@ ReAct：选择下一步行动
 - [ ] **Tool System**：工具注册、发现、权限、参数校验、超时、错误规范及结构化返回。
 - [ ] **Plan Mode**：显式计划的数据结构、激活方式、计划与 ReAct 的关系、步骤进度和重规划。
 - [ ] **Verification & Recovery**：独立验证器的介入点、失败分类、重试/回退和完成条件。
-- [ ] **主动运行接口**：定时任务和事件任务如何进入同一 Runtime，且不让 LLM 承担持续高频监听。
+- [ ] **定时任务接入**：研究复用 dsh 官方 Host Schedule 或通过外部 Scheduler 启动 Codex Run；确定任务创建/修改、持久化、会话目标、权限及运行记录。
+- [ ] **事件触发（暂缓）**：保留 Event Monitor 的长期设计入口，第一版不开发事件检测、触发调度与事件去重。
 - [ ] **dsh / Codex 底座选型**：核实两者代码与许可证、扩展方式及对当前 ReAct、Plan、Tool、Context 设计的适配成本。
 - [ ] **World State 与 Runtime 的边界**：明确状态读写、版本引用、快照/回放接口；具体时空实现延续到第 05 阶段专题设计。
 
@@ -189,6 +209,8 @@ ReAct：选择下一步行动
 
 **开发底座优先评估 dsh / Codex**：选型前对照实际开源代码与维护情况，尽量避免重写通用 Agent Harness；保留领域服务独立性与必要的迁移接口。
 
+**首期主动服务范围**：只实现定时任务；事件触发监测与自动唤起暂缓，保留后续扩展接口。
+
 ### 阶段 07：Benchmark 与科研验证
 
 讨论可复现的时空任务、时间隔离的历史回放、固定工作流/规则基线/通用 Agent 等对照、性能与安全指标，以及候选研究机制。**不在实现之前预设效果或论文结论。**
@@ -209,5 +231,6 @@ ReAct：选择下一步行动
 
 | 日期 | 变更 |
 | --- | --- |
+| 2026-11-09 | 主动任务范围调整：首期只考虑定时任务，事件触发暂缓；确认 dsh 官方 Host Schedule 和 Codex 开源底座外部调度接入的差异，后续选型再定接口。 |
 | 2026-11-09 | 新增开发底座约束：优先评估 dsh / Codex（未选型）；将 World State 单列为后续必须深入讨论的专业时空状态专题，明确其与 Harness 的逻辑边界及待决问题。 |
 | 2026-11-09 | 初始化七阶段讨论路线图；归档第 01、02 阶段共识；记录第 03 阶段已确定的 ReAct 默认框架与可选 Plan Mode；链接第 04 阶段已有任务/能力/工具设计草案。 |
