@@ -221,10 +221,10 @@ ReAct：选择下一步行动
 - **统一模型调用入口**：RIVER-Agent 对外保留 `forecast_traffic_flow` 逻辑工具，不因预测模型种类增多而在 Agent 层增加多个重复工具。
 - **业务模式**：用户未指定模型时，预测服务根据时间粒度、目标航段、输入特征、历史长度、预测时域、数据可用性及模型版本等条件选择**兼容且可用**的模型；Agent 主要表达分析任务与约束，服务负责模型兼容性检查。
 - **显式模型选择**：允许用户或 Agent 指定 `model_id` / `model_version`。对科研实验应固定具体版本，不得在未说明的情况下静默回退到其他模型；请求模型不可用或不兼容时应返回明确错误。
-- **内部抽象**：计划由独立的 **Model Registry + Model Adapter** 管理各模型的元数据、输入准备、模型调用和统一输出；优先作为 dsh 工具背后的航运专业服务，不要求为每个模型注册单独的 LLM Tool。
-- **尚未确定的实现细节**：Registry 元数据 Schema、模型默认选择排序/回退规则、Adapter 接口、特征/预处理版本、模型工件部署和数据引用的实际传输方式。已有预测研究不等于模型已完成可调用部署。
+- **内部抽象（2026-11-12 命名修订）**：统一采用 **Algorithm Registry + Algorithm Adapter** 作为航运专业算法的管理与接入概念，涵盖预测模型、风险计算、优化算法等；它们与中央 Agent 的 LLM Provider 明确分离。预测模型是专业算法的一类。简单的确定性算法可以只注册普通工具/函数，不强制经过完整 Registry/Adapter。该抽象位于 dsh 工具背后的领域服务层。
+- **尚未确定的实现细节**：Algorithm Registry 元数据 Schema、算法类型与适配策略、预测模型默认选择排序/回退规则、Adapter 接口、特征/预处理版本、模型工件部署和数据引用的实际传输方式。已有预测研究不等于模型已完成可调用部署。
 
-**后续重点**：先细化 Model Registry 的最小元数据与 Adapter 的统一执行契约，然后继续讨论上述已明确保留的**数据获取工具具体实现**及**跨工具数据传递**两项专题。
+**后续重点**：按 Algorithm Registry / Algorithm Adapter 的命名细化专业预测算法的最小元数据与执行接口；优先解决上述**数据获取工具具体实现**及**跨工具数据传递**两个必议专题。下一轮建议讨论职责分工：数据访问服务负责查询原始业务数据，Algorithm Adapter 负责根据选中算法准备所需多航段/多特征输入，Agent 只表达任务目标和约束。**该职责方案尚待最终确认**。
 
 现有专题草案：[`docs/TASK_CAPABILITY_TOOL_CATALOG.md`](TASK_CAPABILITY_TOOL_CATALOG.md)。
 
@@ -266,7 +266,8 @@ ReAct：选择下一步行动
 
 | 日期 | 变更 |
 | --- | --- |
-| 2026-11-12 | 已确认统一 `forecast_traffic_flow` 入口：业务任务默认由预测服务按兼容条件选择模型，科研任务支持显式固定模型及版本，不允许无提示回退；后续细化 Model Registry / Model Adapter。 |
+| 2026-11-12 | **命名修订**：将 Model Registry / Model Adapter 统一调整为 Algorithm Registry / Algorithm Adapter，涵盖专业预测、风险计算与优化算法；与中央 LLM Provider 区分，简单确定性算法不强制套用复杂适配层。 |
+| 2026-11-12 | 已确认统一 `forecast_traffic_flow` 入口：业务任务默认由预测服务按兼容条件选择模型，科研任务支持显式固定模型及版本，不允许无提示回退；后续细化 Algorithm Registry / Algorithm Adapter。 |
 | 2026-11-11 | 第 04 阶段新增必议专题：数据获取工具真实接入实现，以及 `get_segment_flow_series` 与 `forecast_traffic_flow` 的跨工具数据传递/Result Store 机制；相关接口仍为候选设计。 |
 | 2026-11-09 | **第 03 阶段架构归档**：新增 [`docs/AGENT_CORE_DESIGN.md`](AGENT_CORE_DESIGN.md)，总结 dsh 底座、默认 ReAct、可选强制只读 Plan Mode、工具/上下文/任务/World State 分层及定时任务范围；保留并发 Skip 等未决项；主线转入第 04 阶段。 |
 | 2026-11-09 | **开发底座决策更新**：明确以 dsh 为主要开发基础，Codex 仅作部分技术参考；替代此前“dsh / Codex 并列候选”的表述，后续优先围绕 dsh 扩展接口设计。 |
