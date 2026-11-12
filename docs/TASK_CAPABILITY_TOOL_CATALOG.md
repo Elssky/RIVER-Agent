@@ -494,3 +494,42 @@
 - **Task State**：目标、可用证据、当前计划、执行历史、错误、预算、是否完成/继续/等待确认。
 
 研究目标是让中央 Agent **基于任务和证据动态选择能力与工具**，而不是把 K01–K13 分别编码成不可改变的固定流程。
+
+
+## 12. 第 04 阶段补充：预测模型选择与管理原则（2026-11-12）
+
+> **状态**：本节为**已确认的架构原则**和**尚待验证的实现接口建议**，不是功能完成清单。第 9 节 P0/P1/P2 和“桥区短时冲突风险”首批示范属于早期草案；目前首期重点已调整为 **K07 航段流量分析与预测 + K08 航行通告查询**。事件触发/持续监测首期暂缓。原 13 类任务、23 项能力、24 项工具仍为目标目录，工具数量不代表首期部署数量。
+
+### 12.1 已确定的模型调用原则
+
+1. **唯一逻辑入口**：K07 通过 `forecast_traffic_flow`（T09）请求交通流预测，不要求每种专业模型对应一个 dsh LLM 可调用工具。
+2. **普通业务任务**：未指定模型时，服务在满足输入数据、航段集合、时空分辨率、历史长度、预测时域和部署可用性等硬约束的候选中选择合适模型；具体排序规则待定。
+3. **科研和显式指定**：允许指定 `model_id`、`model_version`，实验应固定对应版本及预处理配置；不可用或不兼容时显式失败，**不静默更换模型**。
+4. **领域服务独立**：Model Registry 与 Model Adapter 在 dsh 工具之后，负责模型目录、输入特征准备、模型调用及统一输出；Agent 不传递或手工拼装大规模数值矩阵。
+
+### 12.2 Model Registry 候选元数据（待确认 Schema）
+
+| 类别 | 候选字段 | 用途 |
+| --- | --- | --- |
+| 模型身份与来源 | `model_id`、`version`、`artifact_digest`、`status` | 唯一标识模型及其可复现版本、部署状态 |
+| 预测契约 | `task_type`、`segment_coverage`、`resolution`、`history_length`、`supported_horizons` | 校验能否满足当前预测请求 |
+| 输入契约 | `required_features`、`feature_schema_version`、`preprocessing_version`、`missing_data_policy` | 由 Adapter 检查并构建模型输入 |
+| 输出契约 | `output_schema_version`、`target_segments`、`uncertainty_support` | 规范化预测结果及可用的不确定性信息 |
+| 运行要求 | `runtime`、`endpoint`、`resource_requirements` | 部署与调度，禁止向 LLM 泄露凭据 |
+| 评价信息 | `evaluation_dataset`、`evaluation_version`、`metrics` | 支持模型对比；不得跨不同评估集直接据指标排序 |
+
+### 12.3 Model Adapter 候选执行职责
+
+`validate_request -> resolve_data_refs -> prepare_features -> infer -> normalize_output -> register_result`
+
+- 先对请求作兼容性检查；缺少完整五流输入等模型必需特征时，应明确失败或通过授权的数据查询服务补齐，而非假造或由 LLM 拼装数据。
+- 根据 `history_ref` 等引用直接读取专业数据；引用传输和 Result Store 的实现仍为第 04 阶段**必议事项**，目前不得写死为数据库、文件或 RPC。
+- 将模型内部的张量形状、时间顺序、航段顺序、特征顺序转为统一的预测结果契约，并保留输入引用、时间截断、预处理版本、模型工件版本及执行状态。
+- 模型选择、特征生成和结果读取都要保留审计依据；对于历史回放/科研验证，遵守数据可获得时间，防止未来信息泄漏。
+
+### 12.4 不得遗漏的两项后续专题
+
+- **数据获取工具真实实现**：历史交通流的数据来源、查询 API/数据库/文件适配、航段映射、时间分辨率、质量、来源与数据版本。
+- **跨工具数据传递**：`get_segment_flow_series` 到 `forecast_traffic_flow` 的结果传递，比较 `series_ref`、直接传值、共享数据服务的边界；确定存储、权限、失效、并发、重试与恢复机制。
+
+**特别注意**：现有 DSF-Net 研究中的多航段、五流、168 小时输入 / 24 小时预测属于研究背景；不代表 `forecast_traffic_flow` 已完成部署、可从单个 `series_ref` 自动取得全部模型必需输入，或其他模型与其使用相同特征。
