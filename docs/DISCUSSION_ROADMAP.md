@@ -2,7 +2,7 @@
 
 > **用途**：记录项目讨论进度、已达成的设计共识、待解决的问题和阶段交付物。  
 > **维护方式**：每完成一个阶段的讨论，更新本文件并提交至 GitHub `main` 分支。  
-> **最近更新**：2026-11-13  
+> **最近更新**：2026-11-15  
 > **状态说明**：本文记录的是**方案讨论进展**，不代表软件功能已经实现或通过验证。
 
 ## 1. 当前进度
@@ -236,6 +236,19 @@ ReAct：选择下一步行动
 
 **真实数据核验阻塞项**：用户现有 DSF-Net 研究实际数据样本、五流字段/生成公式、M-01～M-17 与空间边界对应关系、时间粒度与统计窗口、文件版本和来源记录目前未在已读取的仓库讨论材料中得到核实，后续需查看真实数据及预处理代码后才能固化 Schema。
 
+**统一逻辑数据结构与查询（2026-11-15，方案讨论稿，未作最终决策）**：
+
+- **三种不同的数据表示**：Source Data（原始 AIS/CSV/Parquet/API）→ Canonical Data Model（统一业务查询语义）→ Algorithm Input（算法专用张量或输入）。不得将某个预测算法的输入矩阵直接规定为全系统数据格式。
+- **航段时序逻辑主键候选**：`dataset_id`、`dataset_version`、`segment_scheme_id/version`、`segment_id`、`time_start`、`time_end`、`feature_id`、必要时增加数据来源/修订版本或观测实例 ID；值、单位、质量、`available_at`、处理来源等为配套信息。对冲突与重复记录的消解策略仍待明确。
+- **逻辑长表 ≠ 物理长表**：统一查询可使用长表语义；航段×小时的静态研究数据优先考虑宽表 Parquet（每行一个航段时间窗口，多列特征）或数据集现有格式，查询时再投影为规范结果；文件是否要转换须基于实际数据规模验证。
+- **预测目标与特征区别**：`traffic_flow`、`crowding_index`、`vessel_count`、`mean_sog`、`space_occupancy` 必须按定义区别；不能把 README 中五个基础特征认作已核验的 DSF-Net “五流输入”。
+- **查询接口核心**：时间区间统一半开 `[start,end)`、明确时区和窗口标记、数据集/航段方案/特征版本、`as_of`（可提供证据时）及质量；支持按多个航段、多个特征和时间窗口筛选。不可用、缺失、尚未产出的数据均须显式表示。
+- **算法输入排列**：由 Algorithm Adapter 根据已锁定的 Algorithm Registry 输入契约决定 segment_order / feature_order / time_order、窗口长度和归一化/特征派生，而不是由 LLM 或通用数据服务猜测；必须记录所用数据及预处理版本。
+- **数据类别特化**：原始 AIS、航行通告等保留自己的专门数据契约；不把所有类型强行存成航段时序长表。可复用统一目录、权限、时空范围及溯源语义。
+- **现实来源补充**：已查看 `Elssky/CrowdingShippingPath` 仓库 README，包含一小时 AIS 时间片、航段数量/速度/空间占用率、统计特征及较早的拥塞度研究方案；README 并不能证明当前 DSF-Net 的最终五流定义或实际张量顺序，且部分示例维度/特征个数表述需对照源码，不应直接固化接口。下一步优先查找真正的数据处理/模型代码与真实输入样本。
+
+**实现与传递继续待定**：可能使用 Parquet + DuckDB 等本地历史数据查询组合；是否通过 Agent 可见 `get_segment_flow_series` 传值/引用、算法内部直接查询或专门数据准备接口仍未决，须基于具体请求及输入规模比较。
+
 
 **已确定的预测模型选择原则（2026-11-12）**：
 
@@ -287,6 +300,7 @@ ReAct：选择下一步行动
 
 | 日期 | 变更 |
 | --- | --- |
+| 2026-11-15 | Data Access Service 继续细化为 Source Data / Canonical Data Model / Algorithm Input 三层数据表示；航段时序统一逻辑查询、物理宽表候选及 Algorithm Adapter 明确排列；查阅 CrowdingShippingPath 旧 README，确认不能当作当前 DSF-Net 五流输入的最终定义。跨工具传递方式仍待定。 |
 | 2026-11-13 | 细化 Data Catalog 候选结构：Dataset、Spatial/Segment、Feature、Asset Manifest/Lineage 四类元数据；明确17航段/五流的真实语义及文件结构仍须用数据核验，不与算法输入窗口、工具间数据传递混淆。 |
 | 2026-11-13 | 开始 Data Access Service 实现专题：以 Data Catalog + 数据访问服务 + Source Providers 为候选逻辑分层，首期优先审查历史航段流量文件并研究 Parquet/DuckDB 方案；**工具间数据传递保留三种方案，未选择引用模式**。 |
 | 2026-11-12 | **命名修订**：将 Model Registry / Model Adapter 统一调整为 Algorithm Registry / Algorithm Adapter，涵盖专业预测、风险计算与优化算法；与中央 LLM Provider 区分，简单确定性算法不强制套用复杂适配层。 |
