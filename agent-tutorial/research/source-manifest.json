@@ -1,0 +1,310 @@
+{
+  "retrieved": "2026-09-27",
+  "note": "Branch snapshots; hashes identify local content, not a verified Git commit. Not a full repository audit.",
+  "files": [
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "README.md",
+      "bytes": 3334,
+      "sha256": "ba4e1f69ff48386e72a9c5e1edaf76aad64a475c2d51af79ccba6d1128261ba7",
+      "source": "https://github.com/openai/codex/blob/main/README.md"
+    },
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "sdk/typescript/README.md",
+      "bytes": 5147,
+      "sha256": "bc454b26a6920efb1826912be6b6ba96348ab39d9f4e70078465deb586dbbfe7",
+      "source": "https://github.com/openai/codex/blob/main/sdk/typescript/README.md"
+    },
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "sdk/typescript/src/threadOptions.ts",
+      "bytes": 812,
+      "sha256": "7377dbe5e2dee65cf43005ae42bdf96c10f01a34d89ddc683c4a66e821901998",
+      "source": "https://github.com/openai/codex/blob/main/sdk/typescript/src/threadOptions.ts"
+    },
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "codex-rs/core/README.md",
+      "bytes": 4869,
+      "sha256": "90419618b596e4965d9326ff57d81a0a3a406dab586b52d114e6829cafc6da31",
+      "source": "https://github.com/openai/codex/blob/main/codex-rs/core/README.md"
+    },
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "codex-rs/core/src/tools/router.rs",
+      "bytes": 13128,
+      "sha256": "2f1fe58ffc726342eeb77c9aff3fff79fadc5abcf414e7af7ba018058a8c649c",
+      "source": "https://github.com/openai/codex/blob/main/codex-rs/core/src/tools/router.rs"
+    },
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "codex-rs/core/src/tools/registry.rs",
+      "bytes": 31670,
+      "sha256": "2146f148c7c7f69e599d4bb2bc8ef903000cfbc157dd9352fd687248f8e6dcaa",
+      "source": "https://github.com/openai/codex/blob/main/codex-rs/core/src/tools/registry.rs"
+    },
+    {
+      "repository": "openai/codex",
+      "branch": "main",
+      "file": "codex-rs/ext/skills/src/lib.rs",
+      "bytes": 1599,
+      "sha256": "d18c2d509dc9a7fc543a885c6497105cf2ede568aa5336243168254dad282c54",
+      "source": "https://github.com/openai/codex/blob/main/codex-rs/ext/skills/src/lib.rs"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "README.md",
+      "bytes": 6895,
+      "sha256": "fe13915e217f905739b64124cbb03b72758fa2081b7198cabeefaee4914a6f14",
+      "source": "https://github.com/earendil-works/pi/blob/main/README.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/ai/README.md",
+      "bytes": 96803,
+      "sha256": "64b0c4e057c2e7dd8bd717298ea804bb84f18ab38cd181b7d0b7c11d4b0bfbde",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/ai/README.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/agent/README.md",
+      "bytes": 21279,
+      "sha256": "e7ae405b15cda9b0555c73c73a0decb4726f5001cdef2dd91bb750c5c860f2ef",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/agent/README.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/coding-agent/docs/sdk.md",
+      "bytes": 8548,
+      "sha256": "699ab87addf214d061b35cd6bac5c3537ad78a6c532ab16f9db0b7488dd32e03",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/sdk.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/coding-agent/docs/skills.md",
+      "bytes": 4793,
+      "sha256": "5b9805525b194474ef1fe5455a0917ef15ed7f710aa9bec2eee11879556469e5",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/coding-agent/docs/extensions.md",
+      "bytes": 12980,
+      "sha256": "cff443ad79f2f8898cfcb435d3bbc85cc9b8ff6ffe0a9e72db1a8dff402070e0",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/coding-agent/docs/packages.md",
+      "bytes": 6077,
+      "sha256": "ee1d46165e4a8fad8a3847721966b3fcfb4ab03e3aa3d946a78f89ffbc93e21a",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/coding-agent/docs/configuration.md",
+      "bytes": 3108,
+      "sha256": "4c1773dc39d57f703e6e6dcebe34b443b93bedf204c490f81375d4d743fa131e",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/configuration.md"
+    },
+    {
+      "repository": "earendil-works/pi",
+      "branch": "main",
+      "file": "packages/coding-agent/examples/extensions/hello.ts",
+      "bytes": 640,
+      "sha256": "0aa4e9800c2526914d4c1edb00b2cfa9bd9dd6da5218289994cccd5f5bfa4934",
+      "source": "https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/hello.ts"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "README.zh.md",
+      "bytes": 3611,
+      "sha256": "33caa5fe73940c89554827e4430d4aa9081556d0fb4486345b6b9ed08d05c74b",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/README.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "SAFETY.zh.md",
+      "bytes": 1530,
+      "sha256": "d021947c09c83eb352961cf12c95f4b5781d3987663e78c4a8b621d2e3be07a3",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/SAFETY.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/architecture.zh.md",
+      "bytes": 18392,
+      "sha256": "1f9ad6d40970c7cd13d15b340ebcbca344b42f0a9527142ae857136827f2bd37",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/cordis-primer.zh.md",
+      "bytes": 4064,
+      "sha256": "db95af7a5ac91522087705c37a2c6aedad0767952b3f3980616f4d43bdee3f34",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cordis-primer.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/agent-lifecycle.zh.md",
+      "bytes": 5975,
+      "sha256": "64a02d8cf01227494fcd56421027ca93307688d895a27232f67dac2b7abc909b",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/agent-lifecycle.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/tool-execution-pipeline.zh.md",
+      "bytes": 4677,
+      "sha256": "05f74be27090ea3ef315757aec9984bbb78af5552f96dea7a63a5168757f75f6",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/tool-execution-pipeline.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/cookbook/adding-a-tool.zh.md",
+      "bytes": 13957,
+      "sha256": "174145506dd2e857d3a3dc63d9d3449ca9abe503c4d6f304f8d92ae5edfce6ef",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cookbook/adding-a-tool.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/cookbook/adding-an-llm-adapter.zh.md",
+      "bytes": 4131,
+      "sha256": "308e74d368a06545aa52f047858105e97aafbe3578afb030c709cd8df63e25a8",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cookbook/adding-an-llm-adapter.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "docs/user/develop/basic/index.zh.md",
+      "bytes": 3825,
+      "sha256": "ad800b0cd0102aecace97ba19901afc9c29a139b0a25d3f5137e02ec292393ea",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/index.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "packages/skill/tool-skill/README.zh.md",
+      "bytes": 14071,
+      "sha256": "3f35f11390bdeec1287ac6aea06f029c5f0878e0169c70b6d54fc3cd77796a1f",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/tool-skill/README.zh.md"
+    },
+    {
+      "repository": "deepseek-ai/deepseek-harness",
+      "branch": "master",
+      "file": "packages/sdk/client/README.zh.md",
+      "bytes": 10306,
+      "sha256": "28122d7db6d7d1c90f8be7cf599dc770ed400c77ad27d618e8974df161659bfe",
+      "source": "https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/client/README.zh.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "README.md",
+      "bytes": 43370,
+      "sha256": "21195bfba51235eeba6f272e6454ab046f0791b3b2bf260417c56b8f4abb95a2",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/README.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter1.md",
+      "bytes": 82813,
+      "sha256": "03f1c8e82fbb112758e0ed85b147b3aaef3083b7389c6d9aac0d5abe3c0474c5",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter1.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter2.md",
+      "bytes": 130806,
+      "sha256": "a64c23de09c1108b2c038184b06ed89f0b0929fd1e08208e25b5d983d268af59",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter2.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter3.md",
+      "bytes": 100023,
+      "sha256": "aef4bd529d906b7cd1fa32ab25e55ef88254a9220d769bebead423b1c754d6bc",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter3.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter4.md",
+      "bytes": 71664,
+      "sha256": "2b08715724e111bfae237e4b1660070ee844ccb3e5ed9f54b92e8d0ab4f30394",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter4.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter5.md",
+      "bytes": 113700,
+      "sha256": "f6153570ccd5dd763a4f1cfbb01bcc8eb3d6012738ec5645db720d733f86019f",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter5.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter6.md",
+      "bytes": 93559,
+      "sha256": "952cd29bcd63e6bcf599a240b34487f852e55154f7ec21af65af06042558f1e6",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter6.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter7.md",
+      "bytes": 109424,
+      "sha256": "30bbc29c9826d0223bd9d10393378f3f01970d9af88b9f9d2115dfaca54218e8",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter7.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter8.md",
+      "bytes": 136717,
+      "sha256": "000ee0097f74a53fdb4d6a2950b21cc5848a16e7d7501dce1ee7ad19bc366af7",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter8.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter9.md",
+      "bytes": 62756,
+      "sha256": "855e8b9af9cb72f891452542825fa5e2886e763af0429c715fc7d3a7f5a6592d",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter9.md"
+    },
+    {
+      "repository": "bojieli/ai-agent-book",
+      "branch": "main",
+      "file": "book/chapter10.md",
+      "bytes": 101683,
+      "sha256": "9d3ae92955cc8ca5fd8ed7e5e9f1bdb6ad6c6cf7aa3ea77cfee7931badaafd15",
+      "source": "https://github.com/bojieli/ai-agent-book/blob/main/book/chapter10.md"
+    }
+  ]
+}

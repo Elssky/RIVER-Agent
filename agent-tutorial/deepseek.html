@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="理解 Cordis、服务依赖、可逆注册，以及一切皆插件的组装方式。"><title>深入 DeepSeek Harness · RIVER-Agent Tutorial</title><link rel="icon" type="image/svg+xml" href="assets/logo.svg"><link rel="stylesheet" href="assets/style.css"><script defer src="assets/search-index.js"></script><script defer src="assets/app.js"></script></head>
+<body data-page="deepseek"><a class="skip" href="#main">跳到正文</a><div class="top-progress" id="top-progress"></div>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+</span><span>RIVER-Agent Tutorial<small>BUILD · UNDERSTAND · EXPLORE</small></span></a><div class="header-actions"><button id="search-open" aria-label="搜索全部教程">⌕ <span>搜索教程</span><kbd>/</kbd></button><button id="font-toggle" aria-label="切换较大字体">Aa</button><button id="print" aria-label="打印当前篇">打印</button><button id="menu-toggle" aria-expanded="false" aria-controls="sidebar">目录 ☰</button></div></header>
+<div class="layout"><aside id="sidebar"><div class="side-label">学习地图 <span>8 篇</span></div><nav aria-label="篇章导航"><a class="page-link " href="index.html" ><span>01</span>从零设计 Agent</a><a class="page-link " href="build.html" ><span>02</span>实现你的第一个 Agent</a><a class="page-link " href="extensions.html" ><span>03</span>Skill、插件与 MCP</a><a class="page-link " href="reliability.html" ><span>04</span>让 Agent 可靠地工作</a><a class="page-link " href="codex.html" ><span>05</span>深入 Codex</a><a class="page-link " href="pi.html" ><span>06</span>深入 Pi</a><a class="page-link active" href="deepseek.html" aria-current=page><span>07</span>深入 DeepSeek Harness</a><a class="page-link " href="reading.html" ><span>08</span>阅读路线与资料索引</a></nav><div class="side-label local-label">本篇目录</div><nav class="local-toc" aria-label="本篇章节"><a href="#s1"><span>01</span>定位：一切皆插件的 Agent Harness</a><a href="#s2"><span>02</span>Cordis：理解五个基本概念</a><a href="#s3"><span>03</span>源码地图与能力 Seam</a><a href="#s4"><span>04</span>Profile 与 Bundle：如何组装一个产品</a><a href="#s5"><span>05</span>写第一个工具插件</a><a href="#s6"><span>06</span>生命周期：步骤、轮次与日志</a><a href="#s7"><span>07</span>工具管线：策略、执行与结果归一化</a><a href="#s8"><span>08</span>Skill 子系统：注册、来源与模型入口</a><a href="#s9"><span>09</span>大模型适配器的契约</a><a href="#s10"><span>10</span>SDK 与外部集成</a><a href="#s11"><span>11</span>可以迁移到自己的设计</a></nav><div class="side-note">从一个小循环开始<br>让每一步都有证据。<span>本地阅读 · 无外部资源依赖</span></div></aside>
+<main id="main"><div class="chapter-meta"><span>SOURCE TOUR / DSH</span><span>约 11 分钟 · 11 节</span></div><div class="chapter-head"><div><h1>深入 DeepSeek Harness</h1><p>理解 Cordis、服务依赖、可逆注册，以及一切皆插件的组装方式。</p></div><div class="head-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+<span>实验笔记 07</span></div></div><div class="source-note">资料核对：2026-09-27 <span>项目事实附来源；自建方案与教学简化会明确标注。</span></div>
+<article><h2 id="s1">定位：一切皆插件的 Agent Harness</h2>
+<p><a href="https://github.com/deepseek-ai/deepseek-harness">deepseek-ai/deepseek-harness</a> 简称 <code>dsh</code>，以 Cordis 为底层组合框架。模型适配器、工具注册表、会话日志乃至 agent loop 都通过插件组装，因此扩展不必始终改一个固定核心。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.zh.md">架构文档</a>。这与 RIVER-Agent 的已讨论路线直接相关：优先复用 dsh 通用 Harness，再以领域插件、工具和独立专业服务扩展，不另造第二套主循环。项目集成前仍须锁定并核实 dsh 版本、许可证与具体接口。</p>
+<p>它处于开发者预览，接口可能出现破坏兼容的变化。最适合学习的是<strong>组合机制、服务边界、可逆副作用和日志投影</strong>。学习时固定版本；本文基于本次取得的 <code>master</code> 分支资料，而不是一个长期稳定的接口承诺。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/README.zh.md">README</a>。</p>
+<h2 id="s2">Cordis：理解五个基本概念</h2>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>概念</th>
+<th>含义</th>
+<th>自建 Agent 中的对应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plugin</td>
+<td>向上下文注册行为的模块</td>
+<td>能力包与生命周期</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>服务容器，如 <code>ctx.tools</code></td>
+<td>依赖注入容器</td>
+</tr>
+<tr>
+<td>inject</td>
+<td>声明需要的服务</td>
+<td>启动前依赖检查</td>
+</tr>
+<tr>
+<td>Typed Event</td>
+<td>扩展点的输入输出契约</td>
+<td>Hooks / middleware</td>
+</tr>
+<tr>
+<td>Effect / Dispose</td>
+<td>注册与资源能被撤销</td>
+<td>注销、清理、热重载</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>inject = ['tools']</code> 表示依赖 tools 服务，而不是“模型注入提示词”。Cordis 等待服务就绪，再运行 <code>apply(ctx)</code>。插件应该通过服务 key 访问接口，不把自己锁死在某个具体后端上。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cordis-primer.zh.md">Cordis 入门</a>。</p>
+<p>有些事件是通知，有些事件是 waterfall 包装，有些需要串行处理。waterfall 监听器通常收到 <code>next()</code>，调用它委托后续逻辑，然后可处理返回值；不调用会短路。不同模式的返回值、等待语义和顺序属于契约，不能混用。</p>
+<h2 id="s3">源码地图与能力 Seam</h2>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>路径</th>
+<th>角色</th>
+<th>关注接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/core/agent"><code>packages/core/agent</code></a></td>
+<td>Agent 句柄与注册</td>
+<td>活跃工作、输入与事件</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/core/agent-loop"><code>core/agent-loop</code></a></td>
+<td>默认驱动器</td>
+<td>turn / step 生命周期</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/core/tools"><code>core/tools</code></a></td>
+<td>工具注册与执行管线</td>
+<td>schema、策略、结果</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/core/session"><code>core/session</code></a></td>
+<td>事件日志</td>
+<td>从日志派生模型历史</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/llm/llm"><code>llm/llm</code></a></td>
+<td>模型协议抽象</td>
+<td>Adapter 与 StreamChunk</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/skill/skill"><code>skill/skill</code></a></td>
+<td>Skill 注册表</td>
+<td>来源与内容渲染</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/skill/tool-skill"><code>skill/tool-skill</code></a></td>
+<td>模型侧 Skill 消费方</td>
+<td>目录、加载工具与显式调用</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/bundle/base"><code>bundle/base</code></a></td>
+<td>通用组装</td>
+<td>工具、模型、状态与策略</td>
+</tr>
+<tr>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/sdk/client"><code>sdk/client</code></a></td>
+<td>进程外调用方</td>
+<td>JSON-RPC 与子进程</td>
+</tr>
+</tbody>
+</table></div>
+<p>Seam 是一项可替换能力的连接面，通常由 <strong>接口声明、后端实现、消费方</strong> 三个角色构成。例如文件接口定义 <code>read</code>，本地或沙箱后端提供实现，面向模型的读取工具负责调用与反馈。替换后端不必重写模型工具。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/capability-seams.zh.md">能力边界文档</a>。</p>
+<div class="diagram"><div class="flow"><div class="node">Service Definition<small>定义稳定接口</small></div><span class="arrow">↔</span><div class="node">Provider<small>本地 / 远程 / 沙箱</small></div><span class="arrow">↔</span><div class="node">Consumer<small>模型工具或 UI</small></div></div><p class="caption">把“能力”与“实现位置”分开，才能在同样工具后换执行环境。</p></div>
+<h2 id="s4">Profile 与 Bundle：如何组装一个产品</h2>
+<p><code>profile</code> 是具名运行组装；<code>bundle</code> 提供配置项与挂载代码。当前包含 web、headless、sdk、sdk-minimal、acp 等运行形态。主要 profile 共享 base，再叠加各自应用；sdk-minimal 是独立显式组装的例外。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/architecture.zh.md#profile-与组合包">架构 / Profiles</a>。</p>
+<p>组装按顺序应用 bundle 与 patch，后层能够替换前层配置。先查看实际树，再添加 overlay：</p>
+<pre tabindex="0"><code class="language-sh">dsh --profile web --dump-config
+</code></pre>
+<p>不要把网页入口、SDK 服务器或模型选项散落在不同启动脚本里。dsh 把运行形态表达为 profile，这可以启发自建 agent 使用“配置组装 → 统一启动器”的模式。</p>
+<p>实践时先在已构建源码仓库里创建本地插件，再使用 <code>--patch</code> 添加；不要一开始尝试热替换整个 loop。适配器、工具或策略插件是更容易观察的入口。</p>
+<h2 id="s5">写第一个工具插件</h2>
+<p>下面是原创问候工具，按照当前 dsh <code>defineTool</code> 契约编写。与 Pi 的 <code>content/details</code> 返回格式不同，dsh 的 execute 返回声明过的规范值，render 再生成模型内容。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/tool.zh.md">工具开发教程</a>。</p>
+<pre tabindex="0"><code class="language-typescript">import type { Context } from '@deepseek-ai/cordis';
+import { defineTool } from '@deepseek-ai/dsh-tools';
+
+export const name = 'research-greeting';
+export const inject = ['tools'];
+
+export function apply(ctx: Context) {
+  ctx.tools.register(defineTool({
+    name: 'research_greet',
+    description: 'Return a local greeting without accessing files or network.',
+    parameters: {
+      name: { type: 'string', required: true },
+    },
+    output: {
+      schema: { type: 'string' },
+      render: (_args, value) =&gt; [{ type: 'text', text: value }],
+    },
+    async execute(args) {
+      return `Hello, ${args.name}!`;
+    },
+  }));
+}
+</code></pre>
+<p>注册是可逆副作用，插件释放时工具也撤销。参数在 execute 前校验，但非空字符串、跨字段等业务规则仍需自己检查；读取网络/文件的工具要遵守 <code>exec.signal</code>。错误要按框架规则规范化，不能把不同框架的结果对象混用。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cookbook/adding-a-tool.zh.md">工具编写参考</a>。</p>
+<p>源码试验可用当前官方本地 overlay 方式，替换绝对路径：</p>
+<pre tabindex="0"><code class="language-yaml">- insert:
+    - id: research-greeting
+      name: 'E:/path/to/deepseek-harness/scratch-plugin/src/my-plugin.ts'
+</code></pre>
+<pre tabindex="0"><code class="language-sh">pnpm dsh web --patch ./scratch-plugin/cordis.yml
+</code></pre>
+<p>路径必须是你的实际绝对路径。patch 文件不改变模块解析所在的 profile 目录；相对模块路径不一定按 patch 所在位置解析。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/develop/basic/index.zh.md">第一个插件</a>。</p>
+<h2 id="s6">生命周期：步骤、轮次与日志</h2>
+<p>在 dsh 的定义中，step 是一次模型请求加相关工具执行；turn 包含零个或多个 step。输入被拒绝时，可能出现有 turn、没有 step 的情况。不要用“用户发了一句”直接推断一定调用过模型。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/agent-lifecycle.zh.md">生命周期文档</a>。</p>
+<p>职责顺序可简化为：领取输入 → 提示装配 → pre-step 接纳 → 准备模型调用 → 持久记录 → 从日志派生请求 → 流式模型结果 → 工具执行与结果 → 继续或停止。准备阶段取消时不应留下仿佛已提交的用户/系统输入。</p>
+<p><code>session/event</code> 保存可回放事实，<code>agent/*</code> 负责运行时协调。实时 assistant chunks 用于 UI，完整消息或失败 attempt 在 settlement 后保存。对于自建 agent，最值得学习的是“模型真正看到的信息应能从持久记录重建”，而不是每次任意改一个内存数组。</p>
+<h2 id="s7">工具管线：策略、执行与结果归一化</h2>
+<div class="diagram"><div class="flow"><div class="node">pre-execute<small>允许 / 拒绝 / 询问</small></div><span class="arrow">→</span><div class="node">guards<small>最终单调拒绝</small></div><span class="arrow">→</span><div class="node">execute<small>包装与工具主体</small></div><span class="arrow">→</span><div class="node">post / finalize<small>结果处理</small></div><span class="arrow">→</span><div class="node">result<small>不可变终态</small></div></div><p class="caption">简化自官方工具管线；实际还有内容投影、审批、归一化与日志边界。</p></div>
+<p>工具策略不必分散写进每个能力实现。可以在前置事件中控制，在 around-dispatch 中加入超时与指标，在后置处理阶段规范化结果。需要不可撤销的拒绝约束时使用 guard 思路，避免后来的监听器再次放行。</p>
+<p>规范值、模型可见内容与 UI 展示是不同投影。改变给模型看的文字，不一定删除程序能够访问的结构化值；保密策略必须同时处理真正的数据。工具结束后记录一个权威结果，UI 从持久事实重建，而不是要求工具导入前端组件。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/tool-execution-pipeline.zh.md">工具流水线</a>。</p>
+<p>PTC（程序化工具调用）使工具可在代码中组合，仍应进入相同执行管线。中间结构化值与最后送入模型的输出不同；成本降低不意味着权限可以跳过，也不意味着进程内存无限。</p>
+<h2 id="s8">Skill 子系统：注册、来源与模型入口</h2>
+<p>这里的 Skill 不是直接被 Cordis 当作 TypeScript 插件执行。Skill 注册表提供统一目录，文件系统等 provider 供应技能，tool-skill 消费它们并向模型提供目录和加载工具。</p>
+<p>当前工具技能包依赖 <code>ctx.agents</code>、<code>ctx.tools</code> 与 <code>ctx.skills</code>。模型可调用技能及精确加载工具可见时，会发布持久目录；模型调用 <code>skill</code> 获取全文。用户可以通过对应 <code>/name</code> 手势注入可显式调用的 skill，具体语法和可见性按当前版本配置。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/skill/tool-skill/README.zh.md">tool-skill README</a>。</p>
+<p>目录变更采用完整替换，空目录停用旧名称；已经显式注入正文的技能不应重复加载。这可以启发自建宿主把 skill 目录作为有版本的状态，不只是一段启动时拼接的提示词。</p>
+<p>加载层与 provider 分离，也便于将来支持数据库、远端注册表或打包资源。但共享 skill 的内容格式，不代表共享全部生命周期与权限。</p>
+<h2 id="s9">大模型适配器的契约</h2>
+<p>dsh 在 <code>ctx.llm</code> 上注册适配器。实现不仅要发 HTTP，还要把流归一化到 <code>StreamChunk</code>、保持块索引、正确累积工具参数、传递取消信号、报告 usage 与结束原因。<code>llm-deepseek</code> 与 <code>llm-pi-ai</code> 提供不同接入路线。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/cookbook/adding-an-llm-adapter.zh.md">LLM 适配器指南</a>。</p>
+<p>值得直接借鉴的约束：usage 在 finish 前交付；finish 后不再产生内容；工具参数保持原始 JSON 字符串；不支持的选项明确失败；需要续接的原生元数据保留为 replay state。不要在适配器里静默忽略模型不支持的字段。</p>
+<p>还要将模型目录与实际请求能力统一。配置里“支持图片”不代表传输一定正确；模型能力解析、请求组装和历史续接必须一起验证。</p>
+<h2 id="s10">SDK 与外部集成</h2>
+<p>TypeScript/Python SDK 通过进程外 JSON-RPC 驱动完整 dsh 运行时。TypeScript 的 <code>DeepSeekHarness</code> 管理子进程，选择 profile 与 patches；低层 <code>HarnessClient</code> 提供协议请求与通知。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/packages/sdk/client/README.zh.md">SDK 客户端</a>。</p>
+<pre tabindex="0"><code class="language-typescript">import { DeepSeekHarness } from '@deepseek-ai/dsh-sdk-client';
+
+const harness = new DeepSeekHarness({ profile: 'sdk' });
+try {
+  const result = await harness.run('分析 section-42 在 08:00–08:05 的交通态势；仅使用已授权的查询与分析工具，给出证据来源、数据有效时间和局限。');
+  console.log(result.finalResponse);
+} finally {
+  await harness.close();
+}
+</code></pre>
+<p>需要同版本运行时、有效模型路由和认证；这里省略具体 provider/model 配置以避免绑定某个账户或模型。高层运行收集直到 agent idle，最后助手文本不保证因果上只属于一条输入：steering 与其他排队工作可能参与。服务连接关闭、超时与协议错误要在外层处理。</p>
+<p>当前 SDK 文档还注明没有轮次中提示取消方法，放弃执行需关闭运行时；内部 agent 的取消能力不能直接推断为所有 SDK 都有 <code>cancel()</code>。学习集成时要核对当前协议，不能编造缺失方法。</p>
+<h2 id="s11">可以迁移到自己的设计</h2>
+<p>把服务接口、实现与消费工具分离；注册要可逆；新功能优先挂到合适事件域；从持久日志派生上下文；部署形态通过 profile 与有序配置组装。它们能让自建 agent 更容易扩展，但也引入依赖与生命周期复杂度。</p>
+<p>初学者先做一个工具插件，再做一个策略插件，最后替换一个 provider。每一步验证装载、调用、拒绝、卸载与恢复。生产使用前仍需明确安全评估与执行隔离，dsh 的官方安全说明将其定位为实验性软件。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/SAFETY.zh.md">安全说明</a>。</p>
+<details><summary>自测：一切皆插件，是不是所有模块都能任意重排？</summary><p>不是。服务依赖、事件顺序、不变量与资源所有权限制组合方式。可替换意味着接口稳定、契约清晰；不是消除模块之间的关系。先通过 dump-config 和文档理解实际组合，再修改 overlay。</p></details></article><div class="chapter-complete"><label><input type="checkbox" id="completed"> 我已读完这一篇</label><span id="complete-count"></span></div><nav class="pager" aria-label="上一篇与下一篇"><a href="pi.html">← 上一篇<small>深入 Pi</small></a><a href="reading.html">下一篇 →<small>阅读路线与资料索引</small></a></nav><footer>RIVER-Agent Tutorial · 原创学习教程 · 外部资料版权归原作者所有<br>页面与练习可以离线使用；外部来源链接与真实模型请求需要网络。</footer></main></div>
+<dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">搜索全部教程</h2><button id="search-close" aria-label="关闭搜索">×</button></div><input id="search-input" type="search" placeholder="试试：skill、工具调用、沙箱、恢复…" aria-label="搜索关键词"><p id="search-status" role="status">输入关键词，搜索全部 8 篇教程。</p><div id="search-results"></div></dialog><div id="toast" role="status"></div></body></html>

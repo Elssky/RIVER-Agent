@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="把《深入理解 AI Agent》与三份源码连接起来，形成自己的学习路线。"><title>阅读路线与资料索引 · RIVER-Agent Tutorial</title><link rel="icon" type="image/svg+xml" href="assets/logo.svg"><link rel="stylesheet" href="assets/style.css"><script defer src="assets/search-index.js"></script><script defer src="assets/app.js"></script></head>
+<body data-page="reading"><a class="skip" href="#main">跳到正文</a><div class="top-progress" id="top-progress"></div>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+</span><span>RIVER-Agent Tutorial<small>BUILD · UNDERSTAND · EXPLORE</small></span></a><div class="header-actions"><button id="search-open" aria-label="搜索全部教程">⌕ <span>搜索教程</span><kbd>/</kbd></button><button id="font-toggle" aria-label="切换较大字体">Aa</button><button id="print" aria-label="打印当前篇">打印</button><button id="menu-toggle" aria-expanded="false" aria-controls="sidebar">目录 ☰</button></div></header>
+<div class="layout"><aside id="sidebar"><div class="side-label">学习地图 <span>8 篇</span></div><nav aria-label="篇章导航"><a class="page-link " href="index.html" ><span>01</span>从零设计 Agent</a><a class="page-link " href="build.html" ><span>02</span>实现你的第一个 Agent</a><a class="page-link " href="extensions.html" ><span>03</span>Skill、插件与 MCP</a><a class="page-link " href="reliability.html" ><span>04</span>让 Agent 可靠地工作</a><a class="page-link " href="codex.html" ><span>05</span>深入 Codex</a><a class="page-link " href="pi.html" ><span>06</span>深入 Pi</a><a class="page-link " href="deepseek.html" ><span>07</span>深入 DeepSeek Harness</a><a class="page-link active" href="reading.html" aria-current=page><span>08</span>阅读路线与资料索引</a></nav><div class="side-label local-label">本篇目录</div><nav class="local-toc" aria-label="本篇章节"><a href="#s1"><span>01</span>如何使用这份教程</a><a href="#s2"><span>02</span>把通用知识落到 RIVER-Agent</a><a href="#s3"><span>03</span>《深入理解 AI Agent》的阅读地图</a><a href="#s4"><span>04</span>一条可执行的学习路线</a><a href="#s5"><span>05</span>四个项目的来源与版本范围</a><a href="#s6"><span>06</span>规范与官方资料</a><a href="#s7"><span>07</span>常见问题速查</a><a href="#s8"><span>08</span>毕业练习：设计你自己的 Agent</a></nav><div class="side-note">从一个小循环开始<br>让每一步都有证据。<span>本地阅读 · 无外部资源依赖</span></div></aside>
+<main id="main"><div class="chapter-meta"><span>READING ROOM</span><span>约 9 分钟 · 8 节</span></div><div class="chapter-head"><div><h1>阅读路线与资料索引</h1><p>把《深入理解 AI Agent》与三份源码连接起来，形成自己的学习路线。</p></div><div class="head-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+<span>实验笔记 08</span></div></div><div class="source-note">资料核对：2026-09-27 <span>项目事实附来源；自建方案与教学简化会明确标注。</span></div>
+<article><h2 id="s1">如何使用这份教程</h2>
+<p>推荐先读前四篇，完成最小循环与模拟练习，再按自己的目标读源码。对照本仓库 RIVER-Agent 的路线，应优先读 DeepSeek Harness（dsh）的插件组合、Agent Loop、工具管线、Session 与 Schedule；Codex 和 Pi 用来横向比较完整产品运行时及可嵌入 SDK 的不同取舍，AI Agent Book 补充通用原理。RIVER 的设计不以同时支持三个框架为目标。这些是阅读路线建议，不是产品优劣排名。</p>
+<h2 id="s2">把通用知识落到 RIVER-Agent</h2>
+<p>项目文档已经确定的是设计原则，不是已交付功能：以 dsh 为 Harness 底座，使用单一中央 Agent 和默认 ReAct；复杂任务可以进入由 Runtime 强制只读的 Plan Mode；航运算法由独立专业服务承担；大结果外置并以受控引用传递；首期优先定时任务，事件触发后续再议。教程后续章节围绕这些边界举例，但不会把 AIS、预测、风险或规则工具表中的规划项误写成当前已接通能力。</p>
+<p>阅读源码时建议按此顺序追踪：</p>
+<ol>
+<li>dsh Agent Loop 与工具执行管线：弄清一次观察—行动循环在哪些点可以暂停、拒绝或结束。</li>
+<li>dsh Session 与 Persistence：弄清事件日志如何成为可恢复会话事实。</li>
+<li>dsh Cordis、Profile 与 Bundle：弄清 RIVER 扩展怎样装配并可逆卸载。</li>
+<li>dsh Schedule：区分定时投递回执与 RIVER 业务 Run 完成状态。</li>
+<li>再设计领域工具契约：从观测查询、结果引用、专业计算、时空有效性验证构成低风险切片。</li>
+</ol>
+<p>具体 dsh 接口须以最终锁定版本核实。尤其是工具发现、Plan Mode 的只读强制能力、Host Schedule 的实际行为和会话恢复策略，不能只凭架构概念假设 API 已具备。</p>
+<p>全站正文、样式、搜索索引与交互都在本地。双击 <code>index.html</code> 即可阅读，不需要服务器或网络；外部原始文档与真实模型调用需要网络。复制按钮在部分本地浏览器中会采用兼容方式；阅读完成状态受浏览器本地存储策略影响。</p>
+<p>正文中的代码分三类：标注“示意”的片段用于理解设计；框架示例需要相应依赖、版本与认证；<code>examples/agent.py</code> 是实际可运行练习。不要把概念接口当成项目已发布的 API。</p>
+<h2 id="s3">《深入理解 AI Agent》的阅读地图</h2>
+<p><a href="https://github.com/bojieli/ai-agent-book">bojieli/ai-agent-book</a> 是李博杰《深入理解 AI Agent：设计原理与工程实践》的开源主仓库，提供正文与配套实验。本次获取的正文组织为 10 章。这里提供原创的阅读映射，不复制整书内容。<a href="https://bojieli.github.io/ai-agent-book/">在线阅读入口</a>。</p>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>原书章节</th>
+<th>要回答的问题</th>
+<th>对应本教程练习</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter1.md">1 · AI Agent 入门</a></td>
+<td>Agent 与 harness 分别提供什么？</td>
+<td>画出任务边界与完整循环</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter2.md">2 · 上下文工程</a></td>
+<td>每次请求放什么，怎样压缩？</td>
+<td>比较全量上下文与按需加载</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter3.md">3 · 用户记忆和知识库</a></td>
+<td>记忆与检索怎样参与决策？</td>
+<td>给证据加来源与时间</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter4.md">4 · 工具</a></td>
+<td>动作空间怎样设计与限制？</td>
+<td>为工具定义 schema 与错误结果</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter5.md">5 · 代码相关内容</a></td>
+<td>代码执行如何增强能力？</td>
+<td>用隔离执行器代替任意 shell</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter6.md">6 · 交互</a></td>
+<td>观察与动作空间如何扩展？</td>
+<td>做流式进度、中途修正与取消</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter7.md">7 · Agent 的评估</a></td>
+<td>如何区分真实改进与波动？</td>
+<td>建立成功断言与故障任务集</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter8.md">8 · 模型后训练</a></td>
+<td>何时需要改变模型本身？</td>
+<td>先测 harness 瓶颈，再考虑训练</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter9.md">9 · Agent 的持续进化</a></td>
+<td>怎样用轨迹推动迭代？</td>
+<td>将失败案例变成回归评估</td>
+</tr>
+<tr>
+<td><a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter10.md">10 · 多 Agent 协作</a></td>
+<td>拆分何时更有效？</td>
+<td>三个独立调查任务与证据合并</td>
+</tr>
+</tbody>
+</table></div>
+<p>第 5 章在表中使用主题描述而非引用完整章名。章号以本次正文为准，旧版 PDF 的组织可能不同；后续请核对仓库最新目录。</p>
+<p>阅读原书时，每章记下一个原理、一个失败模式和一个可执行实验。比如读完上下文工程，不必背所有压缩方法，先验证“只保留新证据 + 摘要旧调查”是否减少费用且不丢关键事实。</p>
+<h2 id="s4">一条可执行的学习路线</h2>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>要做什么</th>
+<th>交付证据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一轮 · 看懂</td>
+<td>前四篇 + 原书 1/2/4 章</td>
+<td>RIVER 逻辑架构图与一个领域工具契约</td>
+</tr>
+<tr>
+<td>第二轮 · 做出</td>
+<td>跑通 Python 教学闭环，再写 AIS 查询的模拟工具契约</td>
+<td>成功、拒绝、坏参数和过期数据轨迹</td>
+</tr>
+<tr>
+<td>第三轮 · 接入</td>
+<td>在锁定版本中接 dsh 与模型适配</td>
+<td>插件注册、工具调用、Session 恢复记录</td>
+</tr>
+<tr>
+<td>第四轮 · 扩展</td>
+<td>一个航运 Skill + 一个专业服务适配</td>
+<td>证据引用、工具授权与结果时效验证</td>
+</tr>
+<tr>
+<td>第五轮 · 稳定</td>
+<td>原书 3/7/9 章与任务恢复设计</td>
+<td>领域回归任务集、成本和失败分类</td>
+</tr>
+<tr>
+<td>第六轮 · 比较</td>
+<td>评估多 Agent 或模型路由等扩展</td>
+<td>与单中央 Agent 同预算基线的对比结果</td>
+</tr>
+</tbody>
+</table></div>
+<p>不要把“通读所有源码”当成前置条件。围绕一个真实问题追踪请求路径，找到相关测试，再实现一个小变化。这样更容易建立结构化理解。</p>
+<h2 id="s5">四个项目的来源与版本范围</h2>
+<p>本教程于 <strong>2026-09-27</strong> 获取公开文档与源码资料。Codex、Pi、AI Agent Book 使用当时 <code>main</code>，DeepSeek Harness 使用 <code>master</code>。分支 URL 会随项目更新；它们不代表固定 release。本次主要阅读的本地文件摘要记录在 <a href="research/source-manifest.json">research/source-manifest.json</a>，便于核对所用内容。</p>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>原始入口</th>
+<th>本教程覆盖范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex</td>
+<td><a href="https://github.com/openai/codex">openai/codex</a></td>
+<td>README、SDK、工具路由、会话/任务目录、技能扩展与插件目录、官方配置/集成文档</td>
+</tr>
+<tr>
+<td>Pi</td>
+<td><a href="https://github.com/earendil-works/pi">earendil-works/pi</a></td>
+<td>模型 API、Agent core、SDK、Skill、Extension、Package、会话与容器文档</td>
+</tr>
+<tr>
+<td>dsh</td>
+<td><a href="https://github.com/deepseek-ai/deepseek-harness">deepseek-ai/deepseek-harness</a></td>
+<td>架构、Cordis、生命周期、工具管线、工具开发、LLM 适配、Skill 与 SDK</td>
+</tr>
+<tr>
+<td>原书</td>
+<td><a href="https://github.com/bojieli/ai-agent-book">bojieli/ai-agent-book</a></td>
+<td>原理、上下文、检索/记忆、工具、评估与协作主题</td>
+</tr>
+</tbody>
+</table></div>
+<p>这不是逐行审计全仓库，也没有运行三个框架的所有测试或调用付费模型。框架代码示例基于所读接口；可运行 Python 练习与网页交互另行本地验证。具体安装、模型、配额、权限与发布策略以使用时官方资料为准。</p>
+<h2 id="s6">规范与官方资料</h2>
+<ul>
+<li><a href="https://agentskills.io/specification">Agent Skills Specification</a>：Skill 的目录、元数据与渐进加载约定。</li>
+<li><a href="https://modelcontextprotocol.io/specification/2025-11-25/server/tools">MCP 工具规范</a>：工具发现、调用与结果结构。</li>
+<li><a href="https://developers.openai.com/api/docs/guides/function-calling">OpenAI Function Calling</a>：模型提出函数调用，应用执行并返回结果。</li>
+<li><a href="https://api-docs.deepseek.com/guides/tool_calls/">DeepSeek Tool Calls</a>：兼容接口与工具结果回传，核对推理模式要求。</li>
+<li><a href="https://developers.openai.com/codex/sdk">Codex SDK</a> 与 <a href="https://developers.openai.com/codex/app-server">App Server</a>：完整 agent 的宿主集成路径。</li>
+<li><a href="https://developers.openai.com/plugins/concepts/skills">OpenAI Skills</a> 与 <a href="https://developers.openai.com/plugins/build/plugins">插件包装</a>：流程层与安装包的边界。</li>
+</ul>
+<p>各篇中还附有具体源码文件、模块文档与示例链接，便于直接继续阅读。教程里的图表、设计建议与模拟数字是原创教学材料，不是原项目性能数据。</p>
+<h2 id="s7">常见问题速查</h2>
+<p><strong>一定要训练模型吗？</strong> 不需要。先使用支持工具调用的模型，完善 harness 与评估。只有证据表明模型行为是瓶颈时，再考虑训练或换模型。</p>
+<p><strong>Skill 会给 Agent 增加新工具吗？</strong> Skill 主要提供指令与资源。新工具需要宿主、插件或服务注册；skill 只能指导使用已有能力。</p>
+<p><strong>工具可以直接执行模型生成代码吗？</strong> 可以设计这样的执行器，但需要权限、隔离、超时与资源限制。最小练习没有任意代码执行工具。</p>
+<p><strong>MCP 能代替插件系统吗？</strong> 它解决宿主与服务的协议连接。安装包、依赖、生命周期、版本迁移与本地代码扩展仍需宿主设计。</p>
+<p><strong>为什么模型说成功还要验证？</strong> 因为语言声明不是外部世界的事实。执行回执、产物检查与业务断言才能证明结果。</p>
+<p><strong>三个项目该选哪个？</strong> 先判断复用完整 harness 还是自己组合 loop，然后按集成语言、权限、扩展方式与版本稳定性选择。用自己的任务验证，不按星数或工具数量决定。</p>
+<h2 id="s8">毕业练习：设计你自己的 Agent</h2>
+<p>写一份 1–2 页设计说明，包含目标与非目标、输入/输出、工具表、模型适配、Skill 加载、插件生命周期、权限、日志、恢复和评估。再实现三个任务：正常成功、缺少必要信息、工具被拒绝。</p>
+<p>验收时检查 agent 是否诚实报告状态：真正完成才称完成，无法继续就给未完成项；拒绝不会被解释成成功；轨迹能解释每次动作由什么证据触发。做到这些，再逐步扩大能力，你已经拥有了可以继续迭代的工程基础。</p></article><div class="chapter-complete"><label><input type="checkbox" id="completed"> 我已读完这一篇</label><span id="complete-count"></span></div><nav class="pager" aria-label="上一篇与下一篇"><a href="deepseek.html">← 上一篇<small>深入 DeepSeek Harness</small></a><a href="index.html">回到起点<small>带着你的 Agent 再读一次</small></a></nav><footer>RIVER-Agent Tutorial · 原创学习教程 · 外部资料版权归原作者所有<br>页面与练习可以离线使用；外部来源链接与真实模型请求需要网络。</footer></main></div>
+<dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">搜索全部教程</h2><button id="search-close" aria-label="关闭搜索">×</button></div><input id="search-input" type="search" placeholder="试试：skill、工具调用、沙箱、恢复…" aria-label="搜索关键词"><p id="search-status" role="status">输入关键词，搜索全部 8 篇教程。</p><div id="search-results"></div></dialog><div id="toast" role="status"></div></body></html>

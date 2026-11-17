@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="处理长任务、恢复、权限、评估与多 Agent 协作。"><title>让 Agent 可靠地工作 · RIVER-Agent Tutorial</title><link rel="icon" type="image/svg+xml" href="assets/logo.svg"><link rel="stylesheet" href="assets/style.css"><script defer src="assets/search-index.js"></script><script defer src="assets/app.js"></script></head>
+<body data-page="reliability"><a class="skip" href="#main">跳到正文</a><div class="top-progress" id="top-progress"></div>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+</span><span>RIVER-Agent Tutorial<small>BUILD · UNDERSTAND · EXPLORE</small></span></a><div class="header-actions"><button id="search-open" aria-label="搜索全部教程">⌕ <span>搜索教程</span><kbd>/</kbd></button><button id="font-toggle" aria-label="切换较大字体">Aa</button><button id="print" aria-label="打印当前篇">打印</button><button id="menu-toggle" aria-expanded="false" aria-controls="sidebar">目录 ☰</button></div></header>
+<div class="layout"><aside id="sidebar"><div class="side-label">学习地图 <span>8 篇</span></div><nav aria-label="篇章导航"><a class="page-link " href="index.html" ><span>01</span>从零设计 Agent</a><a class="page-link " href="build.html" ><span>02</span>实现你的第一个 Agent</a><a class="page-link " href="extensions.html" ><span>03</span>Skill、插件与 MCP</a><a class="page-link active" href="reliability.html" aria-current=page><span>04</span>让 Agent 可靠地工作</a><a class="page-link " href="codex.html" ><span>05</span>深入 Codex</a><a class="page-link " href="pi.html" ><span>06</span>深入 Pi</a><a class="page-link " href="deepseek.html" ><span>07</span>深入 DeepSeek Harness</a><a class="page-link " href="reading.html" ><span>08</span>阅读路线与资料索引</a></nav><div class="side-label local-label">本篇目录</div><nav class="local-toc" aria-label="本篇章节"><a href="#s1"><span>01</span>把“能演示”变成“能长期使用”</a><a href="#s2"><span>02</span>上下文预算与压缩</a><a href="#s3"><span>03</span>会话状态与事件日志</a><a href="#s4"><span>04</span>恢复、幂等与不确定副作用</a><a href="#s5"><span>05</span>错误、重试与取消</a><a href="#s6"><span>06</span>权限、审批与执行环境</a><a href="#s7"><span>07</span>防止提示注入与凭据泄露</a><a href="#s8"><span>08</span>评估：让改进有证据</a><a href="#s9"><span>09</span>多 Agent：通用路线中的可选项</a><a href="#s10"><span>10</span>一份面向交付的检查表</a></nav><div class="side-note">从一个小循环开始<br>让每一步都有证据。<span>本地阅读 · 无外部资源依赖</span></div></aside>
+<main id="main"><div class="chapter-meta"><span>RELIABILITY</span><span>约 14 分钟 · 10 节</span></div><div class="chapter-head"><div><h1>让 Agent 可靠地工作</h1><p>处理长任务、恢复、权限、评估与多 Agent 协作。</p></div><div class="head-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+<span>实验笔记 04</span></div></div><div class="source-note">资料核对：2026-09-27 <span>项目事实附来源；自建方案与教学简化会明确标注。</span></div>
+<article><h2 id="s1">把“能演示”变成“能长期使用”</h2>
+<p>可靠性来自多条边界共同成立：模型请求可重建、动作权限可判断、失败有分类、任务能停止、产物可验证。不要仅优化一次成功演示。应该问：十次相同任务是否稳定？断网时发生什么？用户取消后还会不会继续改文件？恢复时会不会重复提交？</p>
+<p>对 RIVER-Agent，可靠性首先意味着交通结论可追溯且不越过岸基辅助决策边界。dsh 提供的会话、工具执行和调度能力可以作为 Harness 基础；业务 Run 状态、领域时效检查、World State 与 Result Store 仍要按项目契约设计。这一篇的数字、阈值与状态结构都是教学建议，需要用真实任务校准。</p>
+<h2 id="s2">上下文预算与压缩</h2>
+<p>输入预算近似为：<strong>模型上下文容量 − 输出预留 − 协议/工具开销余量</strong>。计数最好使用提供方适配的 tokenizer 或 API 使用量；按中文字数估算只能作为预警。不同模型的上下文容量与输出上限不一定相同。</p>
+<div class="lab-panel"><h3>上下文预算小实验</h3><div class="budget-grid"><label>上下文容量：<b id="context-value"></b> tokens<input id="budget-context" max="256000" min="16000" step="8000" type="range" value="64000"/></label><label>输出与协议预留：<b id="reserve-value"></b> tokens<input id="budget-reserve" max="12000" min="2000" step="1000" type="range" value="8000"/></label><label>当前输入：<b id="used-value"></b> tokens<input id="budget-used" max="128000" min="2000" step="2000" type="range" value="44000"/></label></div><div aria-hidden="true" id="budget-bars"><span></span><span></span></div><div aria-live="polite" class="budget-result" id="budget-result"></div><p class="caption">蓝色表示输入，粉色表示预留。数字为教学模拟，不是特定模型规格或实际 tokenizer 结果。</p></div>
+<p>压缩的优先顺序可以是：删除重复展示 → 大输出只留引用 → 保留最新相关窗口 → 摘要旧调查 → 重新检索必要证据。不要剪断工具请求与结果的配对，或删除影响后续决策的用户约束。</p>
+<p>一份可继续工作的摘要应保留：目标、范围、授权边界、已完成事实与来源、已发生副作用、失败尝试、未完成事项、下一步建议。摘要是派生状态；完整日志仍保存原始事实。</p>
+<pre tabindex="0"><code class="language-json">{
+  "goal": "分析某航段未来 5 分钟的潜在交通冲突",
+  "constraints": ["岸基辅助分析", "不发布约束性指令"],
+  "confirmed": [{"fact":"AIS观测覆盖至08:55", "source":"result://obs-17", "available_at":"08:56"}],
+  "effects": [],
+  "openQuestions": ["观测覆盖不足以确认所有船舶身份"],
+  "next": "检查观测时效并调用可用的冲突评估工具"
+}
+</code></pre>
+<h2 id="s3">会话状态与事件日志</h2>
+<p>至少区分 task、run、step 和 tool call：task 是用户目标，run 是一次执行尝试，step 是一次模型决策加相关执行，call 是一个具体工具调用。项目对 turn/step 的定义不同，不能用一个全局计数器替代全部层次。</p>
+<p>UI 的流式增量只用于展示。持久日志保存最终消息、调用、结果、状态改变与产物回执。错误流可以记录为 attempt，供诊断但不一定进入模型历史。<strong>回放不应重新执行历史工具。</strong>它是从日志重建视图与状态。</p>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>事件</th>
+<th>持久性建议</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>text_delta / progress</td>
+<td>可瞬态</td>
+<td>快速更新界面</td>
+</tr>
+<tr>
+<td>assistant_message</td>
+<td>持久</td>
+<td>模型实际输出</td>
+</tr>
+<tr>
+<td>tool_intent / tool_result</td>
+<td>持久</td>
+<td>执行证据与恢复</td>
+</tr>
+<tr>
+<td>approval_request / decision</td>
+<td>持久并脱敏</td>
+<td>判断授权范围</td>
+</tr>
+<tr>
+<td>checkpoint / summary</td>
+<td>持久</td>
+<td>压缩与恢复</td>
+</tr>
+<tr>
+<td>task_status</td>
+<td>持久</td>
+<td>判断终态与未完成项</td>
+</tr>
+</tbody>
+</table></div>
+<p>日志必须带版本、run ID、事件序号、时间和关联 ID；不要仅依赖墙上时钟排序。持久化可以从 JSONL 起步，复杂查询用 SQLite，但存储实现不应散落到每个工具里。</p>
+<p>RIVER 的设计还要求分清 <code>Session</code>、业务 <code>Task</code>、业务 <code>Run</code> 与 Harness 的 <code>Turn/Step</code>：一个长期定时 Task 可以触发多次 Run，而一次 Run 内含若干模型步骤和工具调用。调度器确认投递到 Session，只证明触发已送达，不证明交通分析完成；业务状态必须由 Run 的结果与失败原因记录。首期设计优先定时触发，交通事件触发暂缓；监测安全预警不得依赖 LLM 持续在线。</p>
+<p><code>World State</code> 保存可查询的专业时空态势，<code>Result Store</code> 保存大体量轨迹、预测和数值产物，二者都不等于对话记忆。历史回放还要避免未来数据泄漏：观测发生时间、系统可用时间与预测有效时间要分别记录。</p>
+<h2 id="s4">恢复、幂等与不确定副作用</h2>
+<p>最难的问题是：操作已经发生，进程却在写日志之前崩溃。恢复时日志没有成功结果，不能证明操作没发生。RIVER 当前设计优先只读查询和计算，但创建/修改定时任务、外发通知等未来副作用也必须有回执与幂等设计，尤其不能在状态未知时直接重试。</p>
+<div class="diagram"><div class="flow"><div class="node">保存 Intent<small>operation ID + 参数</small></div><span class="arrow">→</span><div class="node">执行动作<small>能否幂等？</small></div><span class="arrow">→</span><div class="node">保存 Receipt<small>产物 / 外部 ID</small></div><span class="arrow">→</span><div class="node">恢复核对<small>查询或人工处理</small></div></div><p class="caption">只有 Intent 时，查询结果优先；无法查证的动作保持“不确定”，不能默认成功或失败。</p></div>
+<p>对写文件可以用内容摘要、预期旧版本和原子发布；对外部 API 优先使用幂等键；对修改共享资源使用版本条件或 compare-and-swap。不要承诺所有动作都有 exactly-once 效果。网络超时往往只能证明没收到回执，无法证明服务端没执行。</p>
+<p>恢复还要重新验证运行环境、工具可用性、插件版本和授权。对 RIVER 来说，还要重新检查 AIS 等观测的可用时间、预测结果有效期和规则版本；历史结果未过期于会话，并不代表仍适用于当前交通态势。旧会话曾获批的动作不必然在新的资源、参数或账号上仍有效。</p>
+<h2 id="s5">错误、重试与取消</h2>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>错误类型</th>
+<th>典型处理</th>
+<th>不应该做</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>格式/参数错误</td>
+<td>给出可修复错误，让模型纠正</td>
+<td>未校验就尝试执行</td>
+</tr>
+<tr>
+<td>429 / 暂时传输失败</td>
+<td>有上限的退避，尊重服务提示</td>
+<td>无限高频重试</td>
+</tr>
+<tr>
+<td>权限拒绝</td>
+<td>停止该动作或选允许的替代</td>
+<td>通过其他工具绕过</td>
+</tr>
+<tr>
+<td>上下文溢出</td>
+<td>剪枝或压缩后重建请求</td>
+<td>原样重发同一个过长请求</td>
+</tr>
+<tr>
+<td>动作结果不确定</td>
+<td>查证回执或目标状态</td>
+<td>盲目重做写操作</td>
+</tr>
+<tr>
+<td>用户取消</td>
+<td>传播信号，清理资源，记录已发生动作</td>
+<td>最后再跑一次“收尾”危险动作</td>
+</tr>
+</tbody>
+</table></div>
+<p>重复无进展检测可以比较工具名、规范化参数、结果摘要与任务状态。相同请求不是永远错误：轮询任务状态可能合理；但每次读取同一文件得到同一结果，又没有新的假设，就应该停止或改变策略。</p>
+<p>给每次任务设置步骤、调用、时间和费用上限。费用上限应根据 usage 累积，预留下一次调用可能消耗的额度。设置了 <code>max_steps</code> 仍可能因某个工具永久阻塞而卡死，所以工具超时和取消必须另外实现。</p>
+<h2 id="s6">权限、审批与执行环境</h2>
+<p>权限不是提示词里的“请小心”。宿主在执行前检查：文件根目录、网络目标、进程权限、账号、资源和动作。审批负责确认某次动作的意图；沙箱负责限制执行能触及的环境。两者作用不同。</p>
+<p>为 RIVER-Agent 设计分级权限：默认按任务授权只读查询；Plan Mode 规划阶段的只读限制由 Runtime 策略强制；创建或修改定时任务、发送通知等副作用绑定具体对象并经过授权。系统不自动控制实船，也不发布约束性通航指令。向用户展示实际动作、目标、预期变化和可恢复性，而不是一堆抽象安全标签。</p>
+<p>Shell 要清理环境变量，控制进程树、工作目录、资源限制和网络。浏览器工具要处理下载、表单提交和不同账号身份；MCP 服务要最小化 scope。第三方插件属于执行代码，不能靠模型层规则隔离。</p>
+<p>Pi 的 README 明确说明没有内置的文件系统/进程/网络/凭据权限限制，默认继承宿主权限；可采用外部容器或沙箱。<a href="https://github.com/earendil-works/pi#permissions--containerization">Pi 权限说明</a>。DeepSeek Harness 的安全说明将其标为实验性开发者预览，不能视作已审计的生产安全系统。<a href="https://github.com/deepseek-ai/deepseek-harness/blob/master/SAFETY.zh.md">dsh 安全说明</a>。</p>
+<h2 id="s7">防止提示注入与凭据泄露</h2>
+<p>为所有上下文标注来源：用户、开发者指令、可信 skill、仓库文件、外部网页、工具结果。外部资料中的操作指令属于数据，不能提升为新的开发者政策。标注信任等级有帮助，但不能保证模型永远不受诱导。</p>
+<p>更强的控制是让模型无法调用不需要的能力：只读任务不暴露发送工具，检索服务不返回凭据，工作区不挂载个人密钥目录，网络出口限制到必要域。对敏感操作，程序检查明确参数，而不是仅让模型判断“安全吗”。</p>
+<p>日志脱敏应覆盖密钥、认证头、个人资料和敏感正文。调试时保存全量请求很方便，也可能造成泄露；因此需要访问控制、保留期限、导出检查和删除机制。长期记忆同样要可审阅、可纠正、可清除。</p>
+<h2 id="s8">评估：让改进有证据</h2>
+<p>建立你自己的任务集，而不是只看某个公开排行榜。每条任务包含输入环境、初始状态、用户目标、允许动作、成功断言、预算与失败判定。同一数据集可以比较不同模型、不同 skill、不同工具和不同上下文策略。</p>
+<p>建议从 20–30 个覆盖真实工作的小任务起步，这个数量是教学建议。覆盖正常、缺信息、歧义、权限拒绝、工具失败、长上下文、资料冲突和提示注入。重要任务多次运行，报告分布，不只挑最好的一次。</p>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>衡量什么</th>
+<th>注意事项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>任务成功率</td>
+<td>验收器判定成功的比例</td>
+<td>验收规则要独立于回答措辞</td>
+</tr>
+<tr>
+<td>工具正确率</td>
+<td>参数、对象、顺序是否合理</td>
+<td>应分错误类别</td>
+</tr>
+<tr>
+<td>越权率</td>
+<td>被执行的违规动作</td>
+<td>拒绝请求不等于越权执行</td>
+</tr>
+<tr>
+<td>证据完整率</td>
+<td>关键结论能否回溯</td>
+<td>链接存在不等于支持结论</td>
+</tr>
+<tr>
+<td>成本与延迟</td>
+<td>每个成功任务的代价</td>
+<td>看失败任务和尾部延迟</td>
+</tr>
+<tr>
+<td>恢复成功率</td>
+<td>中断后是否正确继续</td>
+<td>不可重复副作用单独统计</td>
+</tr>
+</tbody>
+</table></div>
+<p>确定性断言最适合文件和状态；模型裁判可评语义，但需要校准与人工抽样。做消融实验时一次改变一个组件；做模型替换实验时固定 harness。不能看到换模型后分数不涨，就断言模型无作用：任务难度、样本量和验收器也可能限制观察。<a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter7.md">原书第 7 章</a>。</p>
+<h2 id="s9">多 Agent：通用路线中的可选项</h2>
+<p>多 Agent 是通用 Agent 技术路线中的一种可选架构，适合独立调查、隔离上下文或角色复核。RIVER-Agent 当前设计选择单一中央 LLM Agent，航运专业算法和数据服务不是其他 Agent。除非评估证明拆分能改善独立性、吞吐或验证质量，否则不要把领域服务改造成互相对话的多个 LLM 角色。若其他产品选择多 Agent，先写明独立子任务的输入、输出、权限、预算和交付责任。</p>
+<p>一个可评估的通用模式：主 Agent 分配多个只读且互相独立的调查任务 → 子 Agent 返回证据与不确定项 → 主 Agent 合并 → 独立验证。各子任务不能自行扩大授权；总费用要跨任务累积。对 RIVER 的基线应先与单 Agent、同预算、同数据和同工具比较。</p>
+<p>共享目录最容易发生并发冲突。可以划分文件所有权、使用隔离工作区，再通过补丁或产物合并。共享上下文提高信息复用，也可能传播同一个错误；相同模型和相同提示得到一致答案，不构成独立证明。<a href="https://github.com/bojieli/ai-agent-book/blob/main/book/chapter10.md">原书第 10 章</a>。</p>
+<h2 id="s10">一份面向交付的检查表</h2>
+<div class="exercise-list"><label><input type="checkbox"/>目标与成功条件可以由程序或审阅者判断。</label><label><input type="checkbox"/>模型适配保留工具关系、结束原因和必要续接状态。</label><label><input type="checkbox"/>工具参数、权限、超时和取消有独立处理。</label><label><input type="checkbox"/>Skill 与插件不会提升自己的权限。</label><label><input type="checkbox"/>日志可回放，恢复不会默认重做不确定动作。</label><label><input type="checkbox"/>有模拟测试、真实模型评估、故障注入和回归任务。</label><label><input type="checkbox"/>用户能看到进度、审批对象、产物和未完成项。</label></div>
+<p>把每个勾选都关联到实际证据：一条测试、一个日志样例、一个配置或一次人工验收。下一步进入源码篇，学习这些职责在不同工程里如何落地。</p></article><div class="chapter-complete"><label><input type="checkbox" id="completed"> 我已读完这一篇</label><span id="complete-count"></span></div><nav class="pager" aria-label="上一篇与下一篇"><a href="extensions.html">← 上一篇<small>Skill、插件与 MCP</small></a><a href="codex.html">下一篇 →<small>深入 Codex</small></a></nav><footer>RIVER-Agent Tutorial · 原创学习教程 · 外部资料版权归原作者所有<br>页面与练习可以离线使用；外部来源链接与真实模型请求需要网络。</footer></main></div>
+<dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">搜索全部教程</h2><button id="search-close" aria-label="关闭搜索">×</button></div><input id="search-input" type="search" placeholder="试试：skill、工具调用、沙箱、恢复…" aria-label="搜索关键词"><p id="search-status" role="status">输入关键词，搜索全部 8 篇教程。</p><div id="search-results"></div></dialog><div id="toast" role="status"></div></body></html>

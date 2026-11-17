@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从接口契约到真实模型接入，逐步跑通一个有边界的 agent loop。"><title>实现你的第一个 Agent · RIVER-Agent Tutorial</title><link rel="icon" type="image/svg+xml" href="assets/logo.svg"><link rel="stylesheet" href="assets/style.css"><script defer src="assets/search-index.js"></script><script defer src="assets/app.js"></script></head>
+<body data-page="build"><a class="skip" href="#main">跳到正文</a><div class="top-progress" id="top-progress"></div>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+</span><span>RIVER-Agent Tutorial<small>BUILD · UNDERSTAND · EXPLORE</small></span></a><div class="header-actions"><button id="search-open" aria-label="搜索全部教程">⌕ <span>搜索教程</span><kbd>/</kbd></button><button id="font-toggle" aria-label="切换较大字体">Aa</button><button id="print" aria-label="打印当前篇">打印</button><button id="menu-toggle" aria-expanded="false" aria-controls="sidebar">目录 ☰</button></div></header>
+<div class="layout"><aside id="sidebar"><div class="side-label">学习地图 <span>8 篇</span></div><nav aria-label="篇章导航"><a class="page-link " href="index.html" ><span>01</span>从零设计 Agent</a><a class="page-link active" href="build.html" aria-current=page><span>02</span>实现你的第一个 Agent</a><a class="page-link " href="extensions.html" ><span>03</span>Skill、插件与 MCP</a><a class="page-link " href="reliability.html" ><span>04</span>让 Agent 可靠地工作</a><a class="page-link " href="codex.html" ><span>05</span>深入 Codex</a><a class="page-link " href="pi.html" ><span>06</span>深入 Pi</a><a class="page-link " href="deepseek.html" ><span>07</span>深入 DeepSeek Harness</a><a class="page-link " href="reading.html" ><span>08</span>阅读路线与资料索引</a></nav><div class="side-label local-label">本篇目录</div><nav class="local-toc" aria-label="本篇章节"><a href="#s1"><span>01</span>你将做出的程序</a><a href="#s2"><span>02</span>先约定消息与工具结果</a><a href="#s3"><span>03</span>实现有停止权的循环</a><a href="#s4"><span>04</span>工具注册表与参数校验</a><a href="#s5"><span>05</span>真正接入大模型</a><a href="#s6"><span>06</span>流式接口应该怎么做</a><a href="#s7"><span>07</span>Skill 怎样接进这个小程序</a><a href="#s8"><span>08</span>插件怎样接进这个小程序</a><a href="#s9"><span>09</span>会话日志、检查点与恢复</a><a href="#s10"><span>10</span>练习的验证范围与下一步</a></nav><div class="side-note">从一个小循环开始<br>让每一步都有证据。<span>本地阅读 · 无外部资源依赖</span></div></aside>
+<main id="main"><div class="chapter-meta"><span>IMPLEMENTATION</span><span>约 13 分钟 · 10 节</span></div><div class="chapter-head"><div><h1>实现你的第一个 Agent</h1><p>从接口契约到真实模型接入，逐步跑通一个有边界的 agent loop。</p></div><div class="head-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+<span>实验笔记 02</span></div></div><div class="source-note">资料核对：2026-09-27 <span>项目事实附来源；自建方案与教学简化会明确标注。</span></div>
+<article><h2 id="s1">你将做出的程序</h2>
+<p>这一篇把前面的架构缩成可以跑起来的 Python 程序。配套目录 <a href="examples/">examples/</a> 包含 <code>agent.py</code>、一份练习资料、一个报告 skill 和一个明确选择后才加载的示例插件。程序只依赖 Python 标准库，建议 Python 3.10 或以上；默认使用确定性的模拟模型，<strong>不会请求网络，也不需要密钥</strong>。</p>
+<p>它演示工具请求 → 校验 → 范围检查 → 执行 → 反馈，以及重复调用检测和 JSONL 轨迹。它不是生产沙箱、完整 MCP 客户端或完整 YAML skill 解析器。模拟模型采用预设步骤，适合理解运行机制；真实模型的调查策略并不是预先写死的。目录中的 <code>mcp_server.py</code> 属于下一篇的可选示例，需要额外 MCP SDK，不参与默认练习。</p>
+<pre tabindex="0"><code class="language-text">examples/
+  agent.py                 # 模拟 / 兼容 Chat Completions 的模型适配
+  workspace/notes.md       # 一份练习资料
+  skills/research-report/SKILL.md
+  plugins/greeting.py      # 示例能力；仅显式参数启用
+  test_agent.py            # 边界、错误与轨迹验证
+</code></pre>
+<p>进入 <code>examples</code> 目录后运行：</p>
+<pre tabindex="0"><code class="language-powershell">python agent.py --mock
+python agent.py --mock --allow-write
+python agent.py --mock --plugin greeting
+python -m unittest -v test_agent.py
+</code></pre>
+<p>第一条会执行加载 skill、读取资料、提出写报告请求；写入被拒绝后，模拟模型解释拒绝并停止，运行状态为 <code>needs_input</code>。第二条显式授权写入固定的 <code>workspace/output/report.md</code>，随后读取产物进行验证，最终状态为 <code>completed</code>。不传 <code>--allow-write</code> 不会创建报告，但宿主程序仍会写自己的运行日志。</p>
+<h2 id="s2">先约定消息与工具结果</h2>
+<p>为了方便学习，练习使用兼容 Chat Completions 的消息结构：<code>system</code> 表示开发者设定的约束，<code>user</code> 表示本次任务，<code>assistant</code> 可以包含 <code>tool_calls</code>，<code>tool</code> 通过 <code>tool_call_id</code> 返回结果。这只是一个协议适配，不是所有模型的通用格式。</p>
+<pre tabindex="0"><code class="language-json">{
+  "role": "assistant",
+  "content": null,
+  "tool_calls": [{
+    "id": "call_01",
+    "type": "function",
+    "function": {
+      "name": "read_note",
+      "arguments": "{\"path\":\"notes.md\"}"
+    }
+  }]
+}
+</code></pre>
+<p>注意 <code>arguments</code> 在这个协议里是 JSON <strong>字符串</strong>。循环先保存 assistant 消息，再解析并执行所有调用，最后保存与 ID 对应的 tool 消息。遗漏 assistant 工具请求、结果 ID 不匹配或多个请求只返回一个结果，都可能让提供方拒绝后续上下文。</p>
+<p>成功和错误都应该规范化，例如：</p>
+<pre tabindex="0"><code class="language-json">{"ok":true,"data":{"path":"notes.md","text":"...","truncated":false}}
+{"ok":false,"error":{"code":"permission_denied","message":"write not authorized"}}
+</code></pre>
+<p><code>permission_denied</code> 不是模型传入的参数错误。模型可以换成被授权的动作，但不能靠重试绕过权限。保留错误分类，模型才能采取正确的下一步。</p>
+<h2 id="s3">实现有停止权的循环</h2>
+<p>下面是提炼后的逻辑示意；完整可运行代码在 <a href="examples/agent.py">agent.py</a>。</p>
+<pre tabindex="0"><code class="language-python">for step in range(max_steps):
+    reply = provider.generate(messages, registry.schemas())
+    # 必须先确认响应完整，不能执行被截断的工具 JSON。
+    validate_reply(reply)
+    messages.append(reply.message)
+    if not reply.calls:
+        return verify_or_report_incomplete(reply)
+    for call in reply.calls:
+        result = dispatch_with_policy(call)
+        messages.append(tool_result(call.id, result))
+    save_checkpoint(messages, step)
+return result(status="budget_exhausted")
+</code></pre>
+<p>生产实现通常把每一步拆成可测试的函数：<code>prepare_request</code>、<code>normalize_reply</code>、<code>validate_call</code>、<code>authorize</code>、<code>execute</code>、<code>persist</code>、<code>verify</code>。每个函数输入尽量不可变。这样你能通过模拟模型复现错误，无需每次都调用付费 API。</p>
+<p>工具请求最多有多少个？一个工具多久必须返回？重复多少次算无进展？用户取消时处于哪个安全点？这些都是循环的职责。练习设置有限步骤、每批调用数、HTTP 超时和重复请求阈值；更精确的进程取消与总成本控制需要后续实现。</p>
+<p>如果最终答案承认没有完成，应返回 <code>needs_input</code> 或失败状态。不要为了界面看起来顺利，就把所有运行都显示为绿色完成。</p>
+<h2 id="s4">工具注册表与参数校验</h2>
+<p>注册表保存“名字 → schema、实现、策略属性”。装载插件时必须检测重名，卸载时必须明确撤销。模型可见 schema 来自同一份注册表，避免出现“能调用却没说明”或“说明了但实现不存在”。</p>
+<pre tabindex="0"><code class="language-python"># 示例 schema；练习仅支持这一小部分 JSON Schema 约束。
+READ_SCHEMA = {
+    "type": "object",
+    "properties": {"path": {"type": "string"}},
+    "required": ["path"],
+    "additionalProperties": False,
+}
+</code></pre>
+<p>校验顺序应该是：工具存在 → JSON 解析成功 → 类型/必填字段/额外字段正确 → 业务约束 → 权限判定 → 执行。完整 JSON Schema 需要专门的验证库；不要把练习中的轻量检查器当成完整实现。</p>
+<h3 id="river-agent">映射到 RIVER-Agent 的工具契约</h3>
+<p>RIVER 的工具不应把 AIS 明细直接复制进对话，也不应让 LLM 自己计算碰撞风险。一个领域查询工具可返回观测摘要、质量和时间元数据；高容量轨迹或预测结果进入 Result Store，以受控引用供后续专业服务消费。以下是用于讨论契约的伪结构，字段不是已定 API：</p>
+<pre tabindex="0"><code class="language-json">{
+  "tool": "query_traffic_observations",
+  "input": {"area_id": "section-42", "observed_from": "...", "observed_to": "..."},
+  "output": {
+    "result_ref": "result://...",
+    "source": ["ais-feed-a"],
+    "observed_at": "...",
+    "available_at": "...",
+    "quality": {"coverage": "...", "warnings": []}
+  }
+}
+</code></pre>
+<p>下游的轨迹预测或风险评估工具应接收 <code>result_ref</code> 和明确预测时域，并回传算法/数据版本、适用范围、有效期、单位与不确定性。验证器检查来源、时效、单位、区域与规则版本；模型负责解释，不负责替代确定性检查。工具实际可用情况、schema 和 dsh <code>ToolDefinition</code> 接口都要在选定版本与数据接通后核实。</p>
+<p>练习的文件工具将相对路径解析到工作区，拒绝绝对路径、越界路径和过大的非文本文件。输出只能写固定目录中的固定报告文件。这些检查降低误操作，但<strong>不是能抵御恶意并发进程的沙箱</strong>：路径校验后资源仍可能被其他进程替换，实际权限依然属于 Python 进程。生产环境要用隔离文件系统、句柄级访问与操作系统权限补强。</p>
+<p>报告写入时计算内容摘要，相同内容可重复确认，不同内容替换使用临时文件与原子发布思路。独立验证检查输出确实存在、位于允许位置、含必需标题与来源。语义真实性仍需更严格的引用和事实核对。</p>
+<h2 id="s5">真正接入大模型</h2>
+<p>练习的 <code>ChatProvider</code> 通过 HTTP POST 请求 <code>{AGENT_BASE_URL}/chat/completions</code>，请求中包含模型、messages 和 tools。它用于提供<strong>该协议且支持工具调用</strong>的服务。使用前核对服务官方说明、账号权限、模型能力和数据处理范围。</p>
+<pre tabindex="0"><code class="language-powershell"># 在你自己的终端配置；不要把真实密钥写入教程文件。
+$env:AGENT_BASE_URL = "https://api.deepseek.com"
+$env:AGENT_MODEL = "&lt;账户支持且具有工具调用能力的模型 ID&gt;"
+$env:AGENT_API_KEY = "&lt;你的 API 密钥&gt;"
+python agent.py --live --allow-write
+</code></pre>
+<p>以上运行会将练习资料与已加载 skill 发给所选提供方。<code>--live</code> 不会自动读取环境中的密钥并代替你选择模型：三个变量都必须明确配置。练习支持 HTTPS 服务以及本机 HTTP 推理服务，密钥不会写入请求日志。它没有 OAuth 登录流程，也没有完整的 Responses 适配。</p>
+<p>如果使用 OpenAI 支持的 Chat Completions 模型，可将 base URL 设为 <code>https://api.openai.com/v1</code>；如果实现 Responses 接口，则应单独映射输入项、函数调用输出和续接状态，不能只改 URL。<a href="https://developers.openai.com/api/docs/guides/function-calling">OpenAI 函数调用说明</a>。</p>
+<p>DeepSeek 的工具调用文档说明了请求和工具结果的回传流程；部分推理模式还要求保留原生推理字段。练习保留响应中的 <code>reasoning_content</code>，但不同版本或其他提供方仍需单独验证。<a href="https://api-docs.deepseek.com/guides/tool_calls/">DeepSeek Tool Calls</a>。不要默认所有兼容服务对 strict schema、并行工具与推理字段都采用相同语义。</p>
+<h2 id="s6">流式接口应该怎么做</h2>
+<p>练习采用非流式响应，方便你先把闭环做对。引入流式后，要将展示与提交分开：文字 delta 可以立即发给 UI；工具参数 delta 要按调用 ID 或块索引收集；到完整调用边界再解析和校验。不要执行半截参数。</p>
+<div class="diagram"><div class="flow"><div class="node">SSE / SDK 流<small>原始提供方事件</small></div><span class="arrow">→</span><div class="node">适配器<small>归一化与累积</small></div><span class="arrow">→</span><div class="node">完整消息<small>校验后提交</small></div><span class="arrow">→</span><div class="node">工具执行<small>门禁和结果</small></div></div><p class="caption">UI 可观察临时 delta，但会话历史使用已完成消息；流断开应记录 attempt，而不是伪造成功。</p></div>
+<p>流可能在结尾才给 usage。结束事件收到后要判断是正常结束、工具请求、长度上限、取消还是错误。最终 usage 与完成消息应有明确顺序。使用厂商 SDK 可以减少解析工作，但仍需要验证你的适配器对工具与取消的处理。</p>
+<p>取消信号应该传到模型传输、工具执行与长任务。UI 点了“停止”只改变按钮颜色不是取消；执行器必须实际停止等待或终止子进程，并记录哪些副作用已经发生。</p>
+<h2 id="s7">Skill 怎样接进这个小程序</h2>
+<p>练习启动时只把 <code>research-report</code> 的名称与描述放入系统提示，模型通过 <code>load_skill(name)</code> 获得全文。工具返回正文和资源根目录，之后模型按照其中的报告流程进行操作。模拟模式也显式走这一步，便于检查轨迹。</p>
+<p><code>SKILL.md</code> 的 frontmatter 只接受练习支持的简单 <code>name:</code> 和 <code>description:</code> 行，完整的规范字段、YAML 多行字符串、目录发现和冲突诊断属于下一阶段。加载正文只增加上下文，绝不改变 <code>--allow-write</code>。</p>
+<p>自建路由可以先做确定性选择：用户明确指定优先；其次按任务标签筛选；必要时让模型从少量候选里选择。每次记录技能名、正文摘要和版本。没有读取全文之前，不要让模型仅凭描述猜测详细操作。</p>
+<h2 id="s8">插件怎样接进这个小程序</h2>
+<p>使用 <code>--plugin greeting</code> 会装载随教程附带的 <code>greeting.py</code>，调用它的 <code>register(registry)</code>，得到一个 <code>greet</code> 工具与 disposer。结束时撤销注册。练习只允许该固定插件，不从用户消息导入任意模块。</p>
+<pre tabindex="0"><code class="language-python"># plugins/greeting.py 的职责：注册，然后返回清理函数。
+def register(registry):
+    return registry.register(
+        "greet", "Return a local greeting.",
+        {"type": "object", "properties": {"name": {"type": "string"}},
+         "required": ["name"], "additionalProperties": False},
+        lambda args: {"greeting": "Hello, " + args["name"]},
+    )
+</code></pre>
+<p>这展示生命周期，尚不提供依赖解析、热重载、签名或进程隔离。插件的 Python 代码与宿主权限相同；注册表的工具授权不能阻止插件代码在导入时任意访问文件。生产插件系统需决定哪些代码可信、哪些能力必须进程外运行。</p>
+<h2 id="s9">会话日志、检查点与恢复</h2>
+<p>练习每次运行新建 <code>runs/&lt;run_id&gt;/events.jsonl</code> 和 <code>checkpoint.json</code>，记录步骤、调用、结果与完整消息历史。日志用于学习和排查，可能包含文件正文，所以只能放在合适的目录。没有密钥不等于日志没有敏感内容。</p>
+<p>这里没有自动恢复命令。你会看到保存检查点是恢复的前提，但还需要：校验日志版本与完整性、重建消息、核对工具/skill 版本、重新取得授权、处理“动作已发生但结果未落盘”。直接继续最后一个工具调用可能重复副作用。</p>
+<p>一个实用的写操作恢复设计是：执行前保存 <code>intent</code> 和唯一 operation ID；执行后保存 <code>receipt</code>；恢复遇到只有 intent 时，查询目标状态或要求用户确认。支持幂等键的外部服务最好复用同一 operation ID；不支持时要接受无法自动判定的状态。</p>
+<h2 id="s10">练习的验证范围与下一步</h2>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>验证</th>
+<th>要证明的行为</th>
+<th>不代表什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模拟成功流程</td>
+<td>Skill、读、写、验收、轨迹可连起来</td>
+<td>不代表真实模型同样成功</td>
+</tr>
+<tr>
+<td>未授权写入</td>
+<td>报告工具被拒绝，不能声称完成</td>
+<td>不代表进程本身被沙箱化</td>
+</tr>
+<tr>
+<td>越界路径</td>
+<td>工具拒绝工作区外路径</td>
+<td>不代表免疫并发替换攻击</td>
+</tr>
+<tr>
+<td>坏参数与未知工具</td>
+<td>错误进入规范结果，循环可观察</td>
+<td>不代表完整 schema 支持</td>
+</tr>
+<tr>
+<td>插件注销</td>
+<td>注册可以撤销，重名不能覆盖</td>
+<td>不代表外部插件安全</td>
+</tr>
+<tr>
+<td>重复请求 / 步骤预算</td>
+<td>无进展和无限循环可被截停</td>
+<td>不代表完整费用预算</td>
+</tr>
+</tbody>
+</table></div>
+<p>接下来把模拟调用替换成真实模型，对同一组用例观察差异；加入有来源的引用校验；然后再考虑流式、恢复与 MCP。网页不会帮你悄悄调用付费服务。你可以阅读全部代码后，在自己的终端启用 <code>--live</code>。</p>
+<details><summary>练习：让 read_note 支持 offset 和 limit，需要改哪些地方？</summary><p>修改同一份工具 schema 和实现；检查 offset/limit 为正整数并设上限；输出起始行、总行数与截断标志；更新 mock 和验收用例。不要只给提示词加一句“读取少一点”。</p></details></article><div class="chapter-complete"><label><input type="checkbox" id="completed"> 我已读完这一篇</label><span id="complete-count"></span></div><nav class="pager" aria-label="上一篇与下一篇"><a href="index.html">← 上一篇<small>从零设计 Agent</small></a><a href="extensions.html">下一篇 →<small>Skill、插件与 MCP</small></a></nav><footer>RIVER-Agent Tutorial · 原创学习教程 · 外部资料版权归原作者所有<br>页面与练习可以离线使用；外部来源链接与真实模型请求需要网络。</footer></main></div>
+<dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">搜索全部教程</h2><button id="search-close" aria-label="关闭搜索">×</button></div><input id="search-input" type="search" placeholder="试试：skill、工具调用、沙箱、恢复…" aria-label="搜索关键词"><p id="search-status" role="status">输入关键词，搜索全部 8 篇教程。</p><div id="search-results"></div></dialog><div id="toast" role="status"></div></body></html>

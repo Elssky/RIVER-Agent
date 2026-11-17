@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="学习模型抽象、可嵌入循环，以及 TypeScript 扩展的设计。"><title>深入 Pi · RIVER-Agent Tutorial</title><link rel="icon" type="image/svg+xml" href="assets/logo.svg"><link rel="stylesheet" href="assets/style.css"><script defer src="assets/search-index.js"></script><script defer src="assets/app.js"></script></head>
+<body data-page="pi"><a class="skip" href="#main">跳到正文</a><div class="top-progress" id="top-progress"></div>
+<header class="topbar"><a class="brand" href="index.html"><span class="brand-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+</span><span>RIVER-Agent Tutorial<small>BUILD · UNDERSTAND · EXPLORE</small></span></a><div class="header-actions"><button id="search-open" aria-label="搜索全部教程">⌕ <span>搜索教程</span><kbd>/</kbd></button><button id="font-toggle" aria-label="切换较大字体">Aa</button><button id="print" aria-label="打印当前篇">打印</button><button id="menu-toggle" aria-expanded="false" aria-controls="sidebar">目录 ☰</button></div></header>
+<div class="layout"><aside id="sidebar"><div class="side-label">学习地图 <span>8 篇</span></div><nav aria-label="篇章导航"><a class="page-link " href="index.html" ><span>01</span>从零设计 Agent</a><a class="page-link " href="build.html" ><span>02</span>实现你的第一个 Agent</a><a class="page-link " href="extensions.html" ><span>03</span>Skill、插件与 MCP</a><a class="page-link " href="reliability.html" ><span>04</span>让 Agent 可靠地工作</a><a class="page-link " href="codex.html" ><span>05</span>深入 Codex</a><a class="page-link active" href="pi.html" aria-current=page><span>06</span>深入 Pi</a><a class="page-link " href="deepseek.html" ><span>07</span>深入 DeepSeek Harness</a><a class="page-link " href="reading.html" ><span>08</span>阅读路线与资料索引</a></nav><div class="side-label local-label">本篇目录</div><nav class="local-toc" aria-label="本篇章节"><a href="#s1"><span>01</span>定位：把模型、循环与应用拆开</a><a href="#s2"><span>02</span>分层架构与源码地图</a><a href="#s3"><span>03</span>pi-ai：统一模型接口并保留差异</a><a href="#s4"><span>04</span>agent-core：状态、循环与消息转换</a><a href="#s5"><span>05</span>SDK：嵌入完整编码会话</a><a href="#s6"><span>06</span>Extension：增加可执行行为</a><a href="#s7"><span>07</span>Skill 与 Package</a><a href="#s8"><span>08</span>会话、分支与上下文压缩</a><a href="#s9"><span>09</span>权限与 MCP 适配边界</a><a href="#s10"><span>10</span>从 Pi 带走的设计经验</a></nav><div class="side-note">从一个小循环开始<br>让每一步都有证据。<span>本地阅读 · 无外部资源依赖</span></div></aside>
+<main id="main"><div class="chapter-meta"><span>SOURCE TOUR / PI</span><span>约 8 分钟 · 10 节</span></div><div class="chapter-head"><div><h1>深入 Pi</h1><p>学习模型抽象、可嵌入循环，以及 TypeScript 扩展的设计。</p></div><div class="head-bot"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 86" role="img" aria-label="RIVER-Agent Tutorial 雨滴智能体标志">
+  <path d="M50 5C43 18 23 34 23 49a27 27 0 0 0 54 0C77 34 57 18 50 5Z" fill="#dff6ff" stroke="#245c77" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M50 17v10h11" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="62" cy="27" r="3" fill="#64bfc1"/>
+  <path d="M15 31v9h8m54 0h8v-9" fill="none" stroke="#64bfc1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="15" cy="28" r="3" fill="#64bfc1"/><circle cx="85" cy="28" r="3" fill="#64bfc1"/>
+  <rect x="33" y="37" width="34" height="25" rx="10" fill="#fff"/>
+  <circle cx="40" cy="46" r="3" fill="#245c77"/><circle cx="60" cy="46" r="3" fill="#245c77"/>
+  <path d="M44 54q6 6 12 0" fill="none" stroke="#245c77" stroke-width="2.5" stroke-linecap="round"/>
+  <ellipse cx="34" cy="53" rx="4" ry="2" fill="#ffaabd"/><ellipse cx="66" cy="53" rx="4" ry="2" fill="#ffaabd"/>
+  <path d="m9 58 2 4 4 2-4 2-2 4-2-4-4-2 4-2Zm80-9 2 3 3 2-3 2-2 3-2-3-3-2 3-2Z" fill="#a9cce6"/>
+</svg>
+<span>实验笔记 06</span></div></div><div class="source-note">资料核对：2026-09-27 <span>项目事实附来源；自建方案与教学简化会明确标注。</span></div>
+<article><h2 id="s1">定位：把模型、循环与应用拆开</h2>
+<p><a href="https://github.com/earendil-works/pi">earendil-works/pi</a> 把统一模型 API、agent runtime 与编码 CLI 分成多个包。它适合学习如何把小而明确的边界组合成可嵌入 agent，也适合用 TypeScript extension 扩展运行行为。</p>
+<p>本次源码中的 npm 包使用 <code>@earendil-works/*</code>，不要盲目沿用旧文章中的其他命名空间。当前 coding-agent 包版本文件为 <code>0.87.1</code>；这是本次抓取观察，不保证未来安装得到相同版本。建议按你选定的 release/commit 锁定依赖。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/package.json">package.json</a>。</p>
+<h2 id="s2">分层架构与源码地图</h2>
+<div class="diagram"><div class="layers"><div class="layer"><b>pi-coding-agent</b><small>CLI、会话、资源发现、Skill、Extension、交互</small></div><div class="layer"><b>pi-agent-core</b><small>Agent 状态、循环、队列、工具执行、事件</small></div><div class="layer"><b>pi-ai</b><small>提供方、模型目录、认证、流式协议、使用量</small></div><div class="layer"><b>其他支撑包</b><small>TUI、durable、telemetry、chord 等，按需要阅读</small></div></div><p class="caption">先理解前三层，再进入更复杂的持久化与组合运行时。</p></div>
+<div aria-label="可横向滚动的表格" class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>路径</th>
+<th>核心问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/ai/README.md"><code>packages/ai/README.md</code></a></td>
+<td>多提供方怎样共用消息与流式接口？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/agent/README.md"><code>packages/agent/README.md</code></a></td>
+<td>Agent 如何执行工具、管理队列和发布事件？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/sdk.md"><code>coding-agent/docs/sdk.md</code></a></td>
+<td>完整编码会话怎样嵌入 Node/Bun？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md"><code>docs/extensions.md</code></a></td>
+<td>可执行扩展怎样注册与清理？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md"><code>docs/skills.md</code></a></td>
+<td>技能如何发现与按需加载？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md"><code>docs/packages.md</code></a></td>
+<td>扩展与资源如何分发？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/src/core/session-manager.ts"><code>src/core/session-manager.ts</code></a></td>
+<td>轨迹树与活跃分支怎样决定上下文？</td>
+</tr>
+<tr>
+<td><a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/src/core/extensions/types.ts"><code>src/core/extensions/types.ts</code></a></td>
+<td>精确事件与工具类型是什么？</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="s3">pi-ai：统一模型接口并保留差异</h2>
+<p><code>pi-ai</code> 提供多提供方模型集合、认证解析、工具调用与事件流。当前 API 通过模型集合注册提供方，再取得模型并调用集合上的方法。旧代码里的全局函数写法可能已迁移。<a href="https://github.com/earendil-works/pi/blob/main/packages/ai/README.md">pi-ai README</a>。</p>
+<p>统一接口不意味着忽略提供方差异。能力、推理参数、图片、原生历史字段和认证仍要正确映射。自建时可以学习它如何将 transport 的事件转换为模型无关消息，以及如何记录 usage 与 stop reason。</p>
+<p>选一个提供方，追踪请求构建 → stream 解析 → block/delta → 完整 assistant message，再观察工具参数校验。尤其要确认部分 JSON 不会提前执行、错误和取消有不同结束语义。为适配器编写固定流片段测试，比靠真实 API 随机验证更稳定。</p>
+<h2 id="s4">agent-core：状态、循环与消息转换</h2>
+<p>agent-core 在 pi-ai 之上维护状态与工具执行。它区分应用自己的 <code>AgentMessage</code> 和模型支持的消息：先通过 <code>transformContext</code> 筛选/注入，再通过 <code>convertToLlm</code> 转换。UI 专用消息不必全部进入模型上下文。<a href="https://github.com/earendil-works/pi/blob/main/packages/agent/README.md">agent-core README</a>。</p>
+<pre tabindex="0"><code class="language-text">AgentMessage[]
+  → transformContext（剪枝或注入）
+  → convertToLlm（去除 UI 专用类型，映射消息）
+  → Provider 请求
+  → Assistant + ToolResult
+  → 下一次上下文
+</code></pre>
+<p>当前核心支持工具并行或串行策略，以及执行前后钩子。并行模式中工具结束事件可以按完成顺序到达，而结果历史保持 assistant 请求顺序。可借鉴的原则是：<strong>执行调度与持久消息顺序是不同问题</strong>。</p>
+<p>steering 与 follow-up 区分“在当前工作中途修正”与“当前运行结束后再处理”。不要简单把所有新消息追加到正在执行的请求里；明确它们在哪个边界进入下一次决策。</p>
+<h2 id="s5">SDK：嵌入完整编码会话</h2>
+<p>以下示例来自当前 SDK 形态，需要已配置的模型与认证。它会使用工作目录中的资源，具备实际工具能力；可先在一次性工作区尝试。</p>
+<pre tabindex="0"><code class="language-typescript">import { createAgentSession } from "@earendil-works/pi-coding-agent";
+
+const { session } = await createAgentSession({
+  cwd: "/absolute/path/to/scratch-workspace",
+});
+const unsubscribe = session.subscribe((event) =&gt; {
+  if (event.type === "message_update" &amp;&amp;
+      event.assistantMessageEvent.type === "text_delta") {
+    process.stdout.write(event.assistantMessageEvent.delta);
+  }
+});
+try {
+  await session.prompt("阅读 README，给出项目概览。");
+  console.log(session.getLastAssistantText());
+} finally {
+  unsubscribe();
+  session.dispose();
+}
+</code></pre>
+<p><code>createAgentSession</code> 提供完整会话；只用 agent-core 时，需要自己管理资源和持久化。完整 SDK 可以注入 <code>sessionManager</code>、<code>resourceLoader</code>、模型和工具。宿主希望不写会话文件时，可使用 <code>SessionManager.inMemory()</code>，但这并不自动禁止工具读写。</p>
+<p><code>SessionManager</code> 是最终上下文的权威来源，修改 <code>agent.state.messages</code> 不等于修改持久上下文。会话切换会替换 session，对旧 session 的订阅要重新绑定。清理时调用 <code>dispose()</code>，不能只丢弃对象引用。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/sdk.md">SDK 文档</a>。</p>
+<h2 id="s6">Extension：增加可执行行为</h2>
+<p>extension 是默认导出工厂的 TypeScript 模块，接收 <code>ExtensionAPI</code>。可以注册工具、命令、事件、提供方与 UI。下面是根据仓库最小工具例子编写的教学变体：</p>
+<pre tabindex="0"><code class="language-typescript">import { Type } from "@earendil-works/pi-ai";
+import { defineTool, type ExtensionAPI }
+  from "@earendil-works/pi-coding-agent";
+
+const greet = defineTool({
+  name: "research_greet",
+  label: "Research greeting",
+  description: "Return a local greeting; no files or network are accessed.",
+  parameters: Type.Object({ name: Type.String() }),
+  async execute(_id, args, _signal, _update, _ctx) {
+    return {
+      content: [{ type: "text", text: `Hello, ${args.name}!` }],
+      details: { greeted: args.name },
+    };
+  },
+});
+export default function (pi: ExtensionAPI) {
+  pi.registerTool(greet);
+}
+</code></pre>
+<p>可保存为 <code>hello.ts</code> 后通过 <code>pi --extension ./hello.ts</code> 试用。精确签名以当前类型声明为准。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/examples/extensions/hello.ts">原始 hello 示例</a>。</p>
+<p>Pi 工具结果需要模型可见的 <code>content</code> 与用于结构化状态/展示的 <code>details</code>。不要把 UI 字符串当成唯一业务结果。执行失败按约定抛异常；普通返回对象并不会自动变成错误。文件修改要遵守宿主的写入协调机制。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md">Extension 文档</a>。</p>
+<p>工厂里不要立即启动长生命周期进程或监听器：某些调用只加载扩展，不启动完整会话。会话资源在 <code>session_start</code> 或具体命令中启动，在 <code>session_shutdown</code> 做幂等清理。事件的返回值是否生效取决于事件类型，不要假设所有监听器都能阻止执行。</p>
+<h2 id="s7">Skill 与 Package</h2>
+<p>Pi 支持 Agent Skills 规范，启动时向模型展示技能名称与描述，匹配任务后加载全文。用户可以用 <code>/skill:name</code> 显式调用。配置支持 <code>.pi</code> 与 Agent Skills 相关位置，但项目资源受信任设置影响。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/skills.md">Skills 文档</a>。</p>
+<p>package 可以同时携带 extensions、skills、prompts 与 themes。当前 <code>package.json</code> 可通过 <code>pi</code> 字段列出资源路径：</p>
+<pre tabindex="0"><code class="language-json">{
+  "name": "my-research-package",
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": ["./extensions/research.ts"],
+    "skills": ["./skills"],
+    "prompts": ["./prompts/*.md"]
+  }
+}
+</code></pre>
+<p>这是 Pi 格式，不是 Codex 插件 manifest。可通过 <code>pi install ./local-package</code> 管理。扩展导入的宿主包与依赖应按包文档处理，避免把另一份宿主运行时打包进去导致重复类和注册表。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/packages.md">Pi Packages</a>。</p>
+<h2 id="s8">会话、分支与上下文压缩</h2>
+<p>Pi 的完整会话管理保留历史树与活跃叶子，fork/分支不要求删除其他历史。上下文重建选择活跃分支并应用压缩。扩展重建任务状态时，要从活跃分支读取，而不是把每个历史分支的动作都合在一起。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/session-format.md">Session format</a>。</p>
+<p>分支很适合比较调查策略：同一初始资料，一条路径先查入口，另一条先看测试，再对照证据与成本。但是文件和外部副作用不会因为消息分支切换自动回滚，所以实验工作区应隔离，或明确记录修改。</p>
+<p>事件结束也要按层理解：低层 <code>agent_end</code> 后可能还有自动恢复或队列工作，完整集成需要判断 <code>agent_settled</code> 等终态边界。不要在第一条 agent_end 就关闭连接或宣布最终完成。</p>
+<h2 id="s9">权限与 MCP 适配边界</h2>
+<p>Pi README 明确表示没有内置限制文件、进程、网络或凭据访问的权限系统，默认继承启动进程权限。<a href="https://github.com/earendil-works/pi#permissions--containerization">Pi README</a>。项目 trust 管理“是否加载项目资源”，不能代替操作系统隔离。</p>
+<p>extension 与宿主进程拥有相同权限，因而“拦截 tool_call”不能防止恶意扩展绕过工具访问文件。需要强边界时使用容器、micro-VM 或策略控制的外部执行环境。<a href="https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/containerization.md">Containerization 文档</a>。</p>
+<p>若要接入 MCP，可以在扩展层编写桥接：建立 MCP 客户端、发现外部工具、注册 Pi tool、规范化结果，并在生命周期中关闭连接。这里是适配设计建议，不表示 Pi 的每个安装都有内置完整 MCP 集成。仔细验证权限和结果类型后再扩大工具集合。</p>
+<h2 id="s10">从 Pi 带走的设计经验</h2>
+<p>最值得迁移的是：统一模型层、独立 agent core、应用消息到模型消息的转换、事件接口、活跃分支状态、资源按需发现。用最小 extension 开始，增加一个只读工具与一个报告 skill，再用 SDK 把它们嵌进自己的界面。</p>
+<details><summary>练习：扩展只在终端模式有对话框，RPC 和无 UI 模式怎么办？</summary><p>工具与事件逻辑应独立于界面。按 ctx.mode 与 ctx.hasUI 判断是否能交互；不能审批时应返回明确状态，不能默认同意。只有渲染部分使用终端 UI，实际能力保持可测试。</p></details></article><div class="chapter-complete"><label><input type="checkbox" id="completed"> 我已读完这一篇</label><span id="complete-count"></span></div><nav class="pager" aria-label="上一篇与下一篇"><a href="codex.html">← 上一篇<small>深入 Codex</small></a><a href="deepseek.html">下一篇 →<small>深入 DeepSeek Harness</small></a></nav><footer>RIVER-Agent Tutorial · 原创学习教程 · 外部资料版权归原作者所有<br>页面与练习可以离线使用；外部来源链接与真实模型请求需要网络。</footer></main></div>
+<dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">搜索全部教程</h2><button id="search-close" aria-label="关闭搜索">×</button></div><input id="search-input" type="search" placeholder="试试：skill、工具调用、沙箱、恢复…" aria-label="搜索关键词"><p id="search-status" role="status">输入关键词，搜索全部 8 篇教程。</p><div id="search-results"></div></dialog><div id="toast" role="status"></div></body></html>
